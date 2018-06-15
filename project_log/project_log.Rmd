@@ -42,10 +42,13 @@ bibliography: refs_fake.bib
 
 \tableofcontents
 
+The field "Action Taken from Helper Details" seems very useful since this seems to correspond to whether the subject actually clicked to call/email/visit the website of the helper.  
 
+\section{Open questions}
 
-\section{Stream of consciousness}
-
+\begin{enumerate}
+\item How do I get a full enumeration of the custom variables in GA? Like "HelperDetail_Displayed"?
+\end{enumerate}
 
 \newpage
 \section*{References}
