@@ -17,7 +17,7 @@ ga_auth()
 ( my_accounts <- google_analytics_account_list() )
 
 #Use my_accounts to find the viewId. Make sure to replace this with your viewId.
-my_id <- 36556007
+my_id <- 75070560
 
 #set date variables for dyanmic date range
 start_date <- "60daysAgo"
@@ -32,7 +32,7 @@ meta = google_analytics_meta()
 
 #Page View Query
 df1 <- google_analytics(my_id, 
-                          date_range = c("2018-1-1", "2018-06-01"),
+                          date_range = c(start_date, end_date),
                           metrics = c("ga:sessions"),
                           dimensions = c("ga:date"))
 
@@ -57,11 +57,12 @@ rga.open(instance="ga")
 start.date <- "30daysAgo"
 end.date <- "yesterday"
 
-ga$getData(36556007, start.date, end.date, 
+ga$getData('ga:36556007', start.date, end.date, 
            metrics = "ga:visits", dimensions = "ga:date", 
            sort = "", filters = "", segment = "",
            start = 1, max = 1000)
 
+1847700325
 # same error message! 
 
 
