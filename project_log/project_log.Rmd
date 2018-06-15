@@ -42,6 +42,16 @@ bibliography: refs_fake.bib
 
 \tableofcontents
 
+Looking into how to reproduce a cell of the Analysis Dashboard (phone dialed in CO):
+
+```{r, asis=TRUE}
+=SUMIFS('Emergency iPhone'!C$16:C$3000,'Emergency iPhone'!A$16:A$3000,"PhoneDialed",'Emergency iPhone'!B$16:B$3000,"Colorado")+SUMIFS('Emergency Android'!C$16:C$3000,'Emergency Android'!A$16:A$3000,"PhoneDialed",'Emergency Android'!B$16:B$3000,"Colorado")
+```
+
+Seems like this is using the "Emergency iPhone", etc., fields on the next tab over. 
+
+
+
 The field "Action Taken from Helper Details" seems very useful since this seems to correspond to whether the subject actually clicked to call/email/visit the website of the helper.  
 
 \section{Open questions}
