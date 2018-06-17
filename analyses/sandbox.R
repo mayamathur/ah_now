@@ -1,92 +1,104 @@
 
-############################### PACKAGE #1 ############################### 
+# Next up: Combine datasets from the different platforms and maybe try to populate the 
+#  first set of cells?
+
 
 root.path = "~/Dropbox/Personal computer/Independent studies/Animal Help Now/Analyses/ah_now_git"
 setwd(root.path)
 
-library(googleAnalyticsR)
 
-# http://www.ryanpraski.com/google-analytics-r-tutorial/
-# https://www.lunametrics.com/blog/2015/11/23/export-google-analytics-data-with-r/
+############################### HELPER FNS ############################### 
 
-# list of other packages for GA:
-# http://code.markedmondson.me/googleAnalyticsR/index.html
+# pulls data as for google_analytics, but merged across the platforms
+merge_platforms = function(start.date, end.date, ...){
+  
+  
+  #browser()
+  input_list <- as.list(substitute(list(...)))
+  print(input_list)
+  
+  library(googleAnalyticsR)
+  ga_auth()
+  
+  # make id-platform key
+  ids = c(75070560, 66336346, 75085662, 66319754)
+  platforms = c("iPhone", "web", "android", "mweb")
+  
+  datalist = lapply( 1:length(ids),
+                     function(x) {
+                       d.temp = google_analytics( ids[x], 
+                        date_range = c(start.date, end.date),
+                        metrics = c("ga:sessions"),
+                        dimensions = c("ga:date",
+                                                    "ga:eventCategory",
+                                                    "ga:region",
+                                                    "ga:country") )
+                       
+                       d.temp$viewID = ids[x]
+                       d.temp$platform = platforms[x]
+                       
+                       return(d.temp)
+                       }
+                     )
+  library(data.table)
+  d = rbindlist(datalist)
+  }
 
-#Authorize Google Analytics R- this will open a webpage
-#You must be logged into your Google Analytics account on your web browser
-ga_auth()
-
-#Use the Google Analytics Management API to see a list of Google Analytics accounts you have access to
-( my_accounts <- google_analytics_account_list() )
-
-#Use my_accounts to find the viewId (NOT THE OTHER IDS). Make sure to replace this with your viewId.
-# different viewIds for each platform; this is the iPhone app
-my_id <- 75070560
-
-#set date variables for dyanmic date range
-start.date <- "60daysAgo"
-end.date <- "yesterday"
 
 
-# show the variables
-allowed_metric_dim( type = "METRIC" )
-allowed_metric_dim( type = "DIMENSION" )
-
-# save the codebook
-meta = google_analytics_meta()
-write.csv(meta, "codebook.csv")
-
-#Page View Query
-d <- google_analytics(my_id, 
-                          date_range = c(start.date, end.date),
-                          metrics = c("ga:sessions"),
-                          dimensions = c("ga:date"))
-
-#graph sessions by date
-library(ggplot2)
-ggplot(data=d, aes(x=date, y=sessions)) +
-  geom_line(stat="identity")
+# ellipsis issue
+# https://stackoverflow.com/questions/3057341/how-to-use-rs-ellipsis-feature-when-writing-your-own-function
 
 
 ############################### REPRODUCE ANALYSIS DASHBOARD ############################### 
 
 # try to look at phone dials on iPhone
 
-# dates have to be specified like this
-start.date = "2017-06-01"
+# # dates have to be specified like this
+start.date = "2018-01-01"
 end.date = "2018-06-01"
 
-d <- google_analytics(my_id, 
-                      date_range = c(start.date, end.date),
-                      metrics = c("ga:sessions"),
-                      dimensions = c("ga:date",
-                                     "ga:eventCategory",
-                                     "ga:region",
-                                     "ga:country") )
 
-table(d$eventCategory)
-# ah-ha! so the HelperDetail_Displayed, etc., are various values for the eventCategory
+d = merge_platforms(start.date, end.date)
 
 
+# sanity check
+fake = d[d$platform=="iPhone" & d$eventCategory=="PhoneDialed",]
+ids = c(75070560, 66336346, 75085662, 66319754)
+platforms = c("iPhone", "web", "android", "mweb")
+# look only at iPhone
+fake = google_analytics( ids[3], 
+                  date_range = c(start.date, end.date),
+                  metrics = c("ga:sessions"),
+                  dimensions = c("ga:date",
+                                 "ga:eventCategory",
+                                 "ga:region",
+                                 "ga:country") )
+( fake = fake[fake$eventCategory=="PhoneDialed",] )
 
-############################### IPHONE HELPER DETAILS DISPLAYED CHLOROPLETH ############################### 
+
+
+
+############################### CHLOROPLETH ############################### 
 # over last 12 months
 # similar to their "in-between" metric of helpfulness
 
-d2 = d[ d$country == "United States" &
-             d$eventCategory == "HelperDetail_Displayed", ]
+#event = "HelperDetail_Displayed"
+event = "PhoneDialed"
+
 
 # reshape to have 1 row per state
 library(dplyr)
 
 d2 = d %>% filter( country == "United States") %>%
-        filter( eventCategory == "HelperDetail_Displayed" ) %>%
+        filter( eventCategory == event ) %>%
   group_by(region) %>%
   summarise( total = sum(sessions) )
 
 d2$region = tolower(d2$region)
 
 # make placeholder rows for nonexistent states
+library(fiftystater)
 state.names = unique( fifty_states$id )
 
 d3 = data.frame( region = state.names, total = 0 )
@@ -100,13 +112,15 @@ d4$total[ is.na(d4$total) ] = NA
 
 # https://cran.r-project.org/web/packages/fiftystater/vignettes/fiftystater.html
 library(ggplot2)
-library(fiftystater)
+
 
 data("fifty_states") # this line is optional due to lazy data loading
 
 library("RColorBrewer")
 myPalette <- colorRampPalette(brewer.pal(50, "YlOrBr"))
-sc <- scale_fill_gradientn(colours = myPalette(100), limits=c(0, max(d4$total)))
+sc <- scale_fill_gradientn(colours = myPalette(100), limits=c(0, max(d4$total, na.rm=TRUE)))
+
+title = paste( "Frequency of phone dials (all platforms), ", start.date, " to ", end.date, sep="" )
 
 # map_id creates the aesthetic mapping to the state name column in your data
 p <- ggplot(d4, aes(map_id = region)) + 
@@ -121,10 +135,18 @@ p <- ggplot(d4, aes(map_id = region)) +
   scale_y_continuous(breaks = NULL) +
   labs(x = "", y = "") +
   theme(legend.position = "bottom", 
-        panel.background = element_blank())
+        panel.background = element_blank()) + 
+  #guides(fill=guide_legend(title=" ")) +
+  ggtitle(title)
 
 p
 # add border boxes to AK/HI
 p + fifty_states_inset_boxes() 
+
+
+
+
+# reproduce dashboard?
+d4[d4$region=="colorado",]
 
 
