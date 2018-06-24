@@ -17,7 +17,6 @@ setwd(root.path)
 # pulls data as for google_analytics, but merged across the platforms
 merge_platforms = function(start.date, end.date, ...){
   
-  
   #browser()
   input_list <- as.list(substitute(list(...)))
   print(input_list)
@@ -37,7 +36,8 @@ merge_platforms = function(start.date, end.date, ...){
                         dimensions = c("ga:date",
                                                     "ga:eventCategory",
                                                     "ga:region",
-                                                    "ga:country") )
+                                                    "ga:country"),
+                        max = -1 )  # -1 means to return all rows
                        
                        d.temp$viewID = ids[x]
                        d.temp$platform = platforms[x]
@@ -60,27 +60,64 @@ merge_platforms = function(start.date, end.date, ...){
 # try to look at phone dials on iPhone
 
 # # dates have to be specified like this
-start.date = "2018-01-01"
-end.date = "2018-06-01"
+start.date = "2017-01-01"
+end.date = "2017-12-31"
 
 
 d = merge_platforms(start.date, end.date)
 
 
-# sanity check
-fake = d[d$platform=="iPhone" & d$eventCategory=="PhoneDialed",]
-ids = c(75070560, 66336346, 75085662, 66319754)
-platforms = c("iPhone", "web", "android", "mweb")
-# look only at iPhone
-fake = google_analytics( ids[3], 
-                  date_range = c(start.date, end.date),
-                  metrics = c("ga:sessions"),
-                  dimensions = c("ga:date",
-                                 "ga:eventCategory",
-                                 "ga:region",
-                                 "ga:country") )
-( fake = fake[fake$eventCategory=="PhoneDialed",] )
+# # sanity check
+# # iPhone
+# temp1 = google_analytics( 75070560, 
+#                            date_range = c(start.date, end.date),
+#                            metrics = c("ga:sessions"),
+#                            dimensions = c("ga:date",
+#                                           "ga:eventCategory",
+#                                           "ga:region",
+#                                           "ga:country"),
+#                           max = -1 )
+# 
+# temp1 %>% filter( eventCategory == "PhoneDialed", region == "Colorado" )
+# 
+# # Android
+# temp2 = google_analytics( 75085662, 
+#                           date_range = c(start.date, end.date),
+#                           metrics = c("ga:sessions"),
+#                           dimensions = c("ga:date",
+#                                          "ga:eventCategory",
+#                                          "ga:region",
+#                                          "ga:country"),
+#                           max = -1 )
+# 
+# temp2 %>% filter( eventCategory == "PhoneDialed", region == "Colorado" )
+# # indeed, sum of these sessions is 6 between both platforms
 
+# same...
+d %>% filter( eventCategory == "PhoneDialed", region == "Colorado" ) %>%
+  summarise( total = sum(sessions) )
+# 73
+
+
+
+############################### CALLS OVER TIME ############################### 
+
+d$month = month(d$date)
+
+( d.month = d %>% filter( country == "United States", eventCategory == "PhoneDialed" ) %>%
+  group_by(month) %>%
+  summarise( total = sum(sessions) ) )
+
+# how are dates distributed?
+library(lubridate)
+table( month(d$date) )
+
+library(ggplot2)
+
+ggplot( data = d.month, aes(x = month, y = total) ) + 
+  geom_line() +
+  scale_x_continuous( breaks = seq(1, 12, 1)) +
+  theme_classic()
 
 
 
@@ -102,6 +139,8 @@ d2 = d %>% filter( country == "United States") %>%
 
 d2$region = tolower(d2$region)
 
+
+
 # make placeholder rows for nonexistent states
 library(fiftystater)
 state.names = unique( fifty_states$id )
@@ -112,7 +151,6 @@ d4 = merge( d3, d2, all.x = TRUE, by.x = "region", by.y = "region" )
 
 names(d4)[ names(d4) == "total.y" ] = "total"
 d4$total[ is.na(d4$total) ] = NA
-
 
 
 # https://cran.r-project.org/web/packages/fiftystater/vignettes/fiftystater.html
@@ -148,11 +186,6 @@ p
 # add border boxes to AK/HI
 p + fifty_states_inset_boxes() 
 
-
-
-
-# reproduce dashboard?
-d4[d4$region=="colorado",]
 
 
 
