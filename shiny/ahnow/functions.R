@@ -38,7 +38,6 @@ summary_stats = function( .type, .metric = "sessions", .data ) {
 get_data = function( metric = "sessions",
                      start.date,
                      end.date ){
-  #browser()
   
   # make id-platform key
   # from viewID in: ga_account_list()

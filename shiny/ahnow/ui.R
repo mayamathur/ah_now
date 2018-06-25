@@ -4,7 +4,7 @@ source("startup.R")
 source("functions.R")
 
 
-navbarPage( "Animal Help Now! statistics", id = "navbar",
+navbarPage( "AHNow statistics", id = "navbar",
             
             tabPanel( "Basics",
                       sidebarPanel( 
@@ -45,7 +45,8 @@ navbarPage( "Animal Help Now! statistics", id = "navbar",
                       
                       mainPanel(
                       span( textOutput("grand.total") ),
-                       tableOutput("table")
+                       tableOutput("table"),
+                      plotlyOutput("mapPlot", width = "400px", height = "400px")
                         )
 
                       

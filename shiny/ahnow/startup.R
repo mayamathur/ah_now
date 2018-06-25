@@ -4,7 +4,7 @@ library(googleAnalyticsR)
 library(dplyr)
 library(rlang)
 library(lubridate)
-library(DT)
+library(plotly)
 
 ga_auth()
 

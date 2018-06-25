@@ -2,34 +2,21 @@ source("startup.R")
 
 function(input, output, session) {
   
-
     reactiveData <- reactive({
       get_data(metric = input$metric,
                    start.date = format( input$dateRange[1] ),
                    end.date = format( input$dateRange[2] ) )
     })
 
-  #d = get_data(metric = input$metric, start.date = "2017-01-01", end.date = "2017-12-31")
-  
-  
     output$table = renderTable({
       d = reactiveData()
       
       stats = summary_stats( .type = input$type, .metric = input$metric, .data = d )
       return( as.data.frame(stats$platform.tot ) )
-      
-      # fake = data.frame( X = rnorm(10),  Y=rnorm(10))
-      # return(fake)
+
     })
   
     output$grand.total = renderText({
-      
-      # BOOKMARK: SHOULD PROBABLY MOVE THIS ELSEWHERE BECAUSE I DON'T THINK IT'S A GLOBAL VARIABLE
-      # THAT WAY THE TABLE CAN ALSO ACCESS IT
-      # https://stackoverflow.com/questions/22834778/r-shiny-daterangeinput-format
-      # d = get_data(metric = input$metric,
-      #              start.date = format( input$dateRange[1] ),
-      #              end.date = format( input$dateRange[2] )  )
       
       d = reactiveData()
 
@@ -39,6 +26,14 @@ function(input, output, session) {
     
     })
   
+    output$mapPlot = renderPlotly({
+      fake = data.frame( X = rnorm(10), Y = rnorm(10))
+      
+      ggplotly(
+                ggplot( data=fake, aes(x=X, y=Y) ) +
+                   geom_point()
+            )
+    })
 
     
     # output$curveOfExplainAway <- renderPlotly({
