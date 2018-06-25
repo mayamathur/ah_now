@@ -1,32 +1,61 @@
 
 
 source("startup.R")
+source("functions.R")
 
 
-# message to display if non-null true value
-nonnull.mess = 'Note: You are calculating a "non-null" E-value, i.e., an E-value for the minimum
-                amount of unmeasured confounding needed to move the estimate and confidence interval
-                to your specified true value rather than to the null value.'
-
-
-fluidPage( title = "E-value calculator",
+navbarPage( "Animal Help Now! statistics", id = "navbar",
             
-                      mainPanel(
+            tabPanel( "Basics",
+                      sidebarPanel( 
                         
-                          wellPanel(  HTML(paste("<b>We've moved!</b>",
+                        textInput(inputId = "password",
+                                  label = "Password",
+                                  ),
                         
-                                      "The E-value calculator <a href='https://evalue.hmdc.harvard.edu/app/'>has moved</a>.",
-                                      sep="<br/><br/>")) ),
+                        dateInput(inputId = "startDate",
+                                  label = "Start date",
+                                  value = "2017-12-31",
+                                  format = "yyyy-mm-dd"),
+                        
+                        dateInput(inputId = "endDate",
+                                  label = "Start date",
+                                  value = "2017-01-01",
+                                  format = "yyyy-mm-dd"),
+                        
+                        selectInput( "type",
+                                     label = "Event type",
+                                     choices = c( "Phone dialed" = "PhoneDialed",
+                                                  "Animal type filter" = "AnimalTypeFilter",
+                                                  "Case flow" = "CaseFlow",
+                                                  "Helper detail displayed" = "HelperDetail_Displayed"
+                                                   ) ),
+                        
+                        selectInput( "metric",
+                                     label = "Metric to analyze",
+                                     choices = c( "Sessions" = "sessions"
+                                                 # "Users" = "users"
+                                     ) ),
+                        
+                        selectInput( "plotType",
+                                     label = "Plot type",
+                                     choices = c( "Map" = "map",
+                                                  "Line" = "line"
+                                                
+                                     ) )
 
-                          width=6
-                          
-                      )
-)
+                        
+                      ), # end mainPanel
                       
-                     
-
-
-
+                      mainPanel(
+                        span( textOutput("grand.total") ),
+                        span( textOutput("passedDate") ),
+                        span( textOutput("hardCodedDate") )
+                        )
+                      
+            ) # end tabPanel
+            
+)
 
 
 
