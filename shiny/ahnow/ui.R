@@ -52,6 +52,7 @@ navbarPage( "Animal Help Now! statistics", id = "navbar",
                         span( textOutput("passedDate") ),
                         span( textOutput("hardCodedDate") )
                         )
+
                       
             ) # end tabPanel
             
