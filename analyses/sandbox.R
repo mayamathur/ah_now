@@ -1,6 +1,36 @@
 
-# Next up: Combine datasets from the different platforms and maybe try to populate the 
-#  first set of cells?
+############################### HELPER FNS ############################### 
+# Next up: Shiny functions
+
+# pull new dataset from GA each time user changes start or end date, but not otherwise
+
+get_data = function( metric = "sessions", start.date, end.date ) {
+  
+}
+
+summary_stats = function( type, data ) {
+  
+  # grand total of metric for this type (e.g., PhoneDialed)
+  
+  # table of metric total by platform 
+}
+
+# make the plots interactive as in Corinne's code
+chloropleth = function( type,
+                        platforms = c("iPhone", "web", "android", "mweb"),
+                        start.date,
+                        end.date ) {
+  
+}
+
+line_plot( platforms = c("iPhone", "web", "android", "mweb"),
+           start.date,
+           end.date ) {
+  
+}
+
+
+############################### SETUP ############################### 
 
 
 root.path = "~/Dropbox/Personal computer/Independent studies/Animal Help Now/Analyses/ah_now_git"
@@ -119,18 +149,9 @@ d = merge_platforms(start.date = start.date, end.date = end.date)
 
 # YESSSSSS! MATCHES!!!
 # same...
-d %>% filter( type == "PhoneDialed", region == "Colorado" ) %>%
-  group_by(platform) %>%
-  summarise( total = sum(sessions) )
-# 73
-
-# HELPFUL - SUGGESTS THAT ANDROID HAS THE VARIABLES WITHIN DECISIONNAVIGATION
 View( d %>% filter( region == "Colorado" ) %>%
-  group_by(platform, eventCategory) %>%
+  group_by(platform, type) %>%
   summarise( total = sum(sessions) ) )
-# 73
-
-# WAS CORRECT 73 BEFORE I ADDED THE TWO OTHER EVENT THINGS TO DIMENSIONS
 
 # all sessions YTD
 d %>% group_by(platform) %>%
@@ -139,8 +160,6 @@ d %>% group_by(platform) %>%
 
 ############################### DEBUGGING ############################### 
 
-# STILL UNRESOLVED
-# why does querying additional dimensions change the results?
 
 metric = "pageViews"
 temp0 = google_analytics( 75070560,
@@ -176,13 +195,6 @@ res1$total-res0$total
 # but pageViews doesn't
 
 
-# with eventLabel: AnimalTypeFilter = 1996
-# with eventLabel and eventAction: 1996
-# with eventAction: 1996
-# without: 1023
-# with eventLabel and eventAction: 
-
-
 ############################### CALLS OVER TIME ############################### 
 
 d$month = month(d$date)
@@ -216,7 +228,7 @@ event = "PhoneDialed"
 library(dplyr)
 
 d2 = d %>% filter( country == "United States") %>%
-        filter( eventCategory == event ) %>%
+        filter( type == event ) %>%
   group_by(region) %>%
   summarise( total = sum(sessions) )
 
