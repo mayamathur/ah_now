@@ -7,9 +7,14 @@ root.path = "~/Dropbox/Personal computer/Independent studies/Animal Help Now/Ana
 setwd(root.path)
 
 library(googleAnalyticsR)
+library(dplyr)
 
 root.path = "~/Dropbox/Personal computer/Independent studies/Animal Help Now/Analyses/ah_now_git"
 setwd(root.path)
+
+# save the codebook
+meta = google_analytics_meta()
+write.csv(meta, "ahnow_codebook.csv")
 
 
 ############################### HELPER FNS ############################### 
@@ -17,7 +22,6 @@ setwd(root.path)
 # pulls data as for google_analytics, but merged across the platforms
 merge_platforms = function(start.date, end.date, ...){
   
-  #browser()
   input_list <- as.list(substitute(list(...)))
   print(input_list)
   
@@ -25,6 +29,7 @@ merge_platforms = function(start.date, end.date, ...){
   ga_auth()
   
   # make id-platform key
+  # from viewID in: ga_account_list()
   ids = c(75070560, 66336346, 75085662, 66319754)
   platforms = c("iPhone", "web", "android", "mweb")
   
@@ -34,9 +39,11 @@ merge_platforms = function(start.date, end.date, ...){
                         date_range = c(start.date, end.date),
                         metrics = c("ga:sessions"),
                         dimensions = c("ga:date",
-                                                    "ga:eventCategory",
-                                                    "ga:region",
-                                                    "ga:country"),
+                                      "ga:eventCategory",
+                                       # "ga:eventAction",
+                                      #"ga:eventLabel",
+                                        "ga:region",
+                                        "ga:country"),
                         max = -1 )  # -1 means to return all rows
                        
                        d.temp$viewID = ids[x]
@@ -67,37 +74,103 @@ end.date = "2017-12-31"
 d = merge_platforms(start.date, end.date)
 
 
-# # sanity check
-# # iPhone
-# temp1 = google_analytics( 75070560, 
-#                            date_range = c(start.date, end.date),
-#                            metrics = c("ga:sessions"),
-#                            dimensions = c("ga:date",
-#                                           "ga:eventCategory",
-#                                           "ga:region",
-#                                           "ga:country"),
-#                           max = -1 )
-# 
-# temp1 %>% filter( eventCategory == "PhoneDialed", region == "Colorado" )
-# 
-# # Android
-# temp2 = google_analytics( 75085662, 
-#                           date_range = c(start.date, end.date),
-#                           metrics = c("ga:sessions"),
-#                           dimensions = c("ga:date",
-#                                          "ga:eventCategory",
-#                                          "ga:region",
-#                                          "ga:country"),
-#                           max = -1 )
-# 
-# temp2 %>% filter( eventCategory == "PhoneDialed", region == "Colorado" )
-# # indeed, sum of these sessions is 6 between both platforms
+
+# sanity check
+# iPhone
+temp1 = google_analytics( 75070560,
+                           date_range = c(start.date, end.date),
+                           metrics = c("ga:sessions"),
+                           dimensions = c("ga:date",
+                                          "ga:eventCategory",
+                                          "ga:region",
+                                          "ga:country"),
+                          max = -1 )
+
+temp1 %>% filter( region == "Colorado" ) %>%
+  group_by( eventCategory ) %>%
+  summarise( total = sum(sessions) )
+
+# Debugging Android -- basically 
+# Android
+temp2 = google_analytics( 75085662,
+                          date_range = c(start.date, end.date),
+                          metrics = c("ga:sessions"),
+                          dimensions = c("ga:date",
+                                         "ga:eventAction",
+                                         "ga:region",
+                                         "ga:country"),
+                          max = -1 )
+
+temp2 %>% filter( region == "Colorado" ) %>%
+  group_by(eventAction) %>%
+  summarise( total = sum(sessions) )
+
+
+
 
 # same...
 d %>% filter( eventCategory == "PhoneDialed", region == "Colorado" ) %>%
+  group_by(platform) %>%
   summarise( total = sum(sessions) )
 # 73
 
+# HELPFUL - SUGGESTS THAT ANDROID HAS THE VARIABLES WITHIN DECISIONNAVIGATION
+View( d %>% filter( region == "Colorado" ) %>%
+  group_by(platform, eventCategory) %>%
+  summarise( total = sum(sessions) ) )
+# 73
+
+# WAS CORRECT 73 BEFORE I ADDED THE TWO OTHER EVENT THINGS TO DIMENSIONS
+
+# all sessions YTD
+d %>% group_by(platform) %>%
+  summarise( total = sum(sessions) )
+
+
+############################### DEBUGGING ############################### 
+
+# STILL UNRESOLVED
+# why does querying additional dimensions change the results?
+
+metric = "pageViews"
+temp0 = google_analytics( 75070560,
+                          date_range = c(start.date, end.date),
+                          metrics = c(metric),
+                          dimensions = c(
+                                         "eventCategory"
+                                         ),
+                          max = -1 )
+
+temp1 = google_analytics( 75070560,
+                          date_range = c(start.date, end.date),
+                          metrics = c(metric),
+                          dimensions = c( 
+                                        "eventAction",
+                                         "eventCategory"
+                                         ),
+                          max = -1 )
+
+# MATCHES
+res0 = temp0 %>% 
+  group_by( eventCategory ) %>%
+  summarise( total = sum(pageView) )
+
+# DOESN'T MATCH
+res1 = temp1 %>%
+  group_by( eventCategory ) %>%
+  summarise( total = sum(pageViews) )
+
+res1$total-res0$total
+
+# sessions and users have discrepancy
+# but pageViews doesn't
+
+
+# with eventLabel: AnimalTypeFilter = 1996
+# with eventLabel and eventAction: 1996
+# with eventAction: 1996
+# without: 1023
+# with eventLabel and eventAction: 
 
 
 ############################### CALLS OVER TIME ############################### 
@@ -189,9 +262,6 @@ p + fifty_states_inset_boxes()
 
 
 
-# save the codebook
-meta = google_analytics_meta()
-write.csv(meta, "codebook.csv")
 
 
 

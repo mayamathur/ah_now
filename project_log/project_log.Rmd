@@ -42,15 +42,7 @@ bibliography: refs_fake.bib
 
 \tableofcontents
 
-Looking into how to reproduce a cell of the Analysis Dashboard (phone dialed in CO):
-
-```{r, asis=TRUE}
-=SUMIFS('Emergency iPhone'!C$16:C$3000,'Emergency iPhone'!A$16:A$3000,"PhoneDialed",'Emergency iPhone'!B$16:B$3000,"Colorado")+SUMIFS('Emergency Android'!C$16:C$3000,'Emergency Android'!A$16:A$3000,"PhoneDialed",'Emergency Android'!B$16:B$3000,"Colorado")
-```
-
-Seems like this is using the "Emergency iPhone", etc., fields on the next tab over. 
-
-
+Shiny/GA app tutorial: https://www.youtube.com/watch?v=4Ht_vEXJ4wo&feature=youtu.be
 
 The field "Action Taken from Helper Details" seems very useful since this seems to correspond to whether the subject actually clicked to call/email/visit the website of the helper.  
 
@@ -59,6 +51,13 @@ The field "Action Taken from Helper Details" seems very useful since this seems 
 \begin{enumerate}
 \item How do I get a full enumeration of the custom variables in GA? Like "HelperDetail_Displayed"?
 \end{enumerate}
+
+
+\section{Resolved questions}
+
+\subsection{How do I get reproduce the Dashboard?}
+
+Go to the "Report Configuration" tab. Query the same metric and dimensions as are listed there. Note that for Android, it's eventAction instead of eventCategory, and using the latter results in too few sessions.  
 
 \newpage
 \section*{References}
