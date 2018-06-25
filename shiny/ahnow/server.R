@@ -2,7 +2,6 @@ source("startup.R")
 
 function(input, output, session) {
   
-<<<<<<< HEAD
     # d <- reactive({
     #   get_data(metric = input$metric, start.date = "2017-01-01", end.date = "2017-12-31")
     # })
