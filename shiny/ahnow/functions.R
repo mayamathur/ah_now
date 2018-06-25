@@ -29,7 +29,8 @@ summary_stats = function( .type, .metric = "sessions", .data ) {
                 platform.tot = platform.tot ) )
 }
 
-
+# d = get_data( start.date = "2017-01-01", end.date = "2017-12-31")
+# stats = summary_stats( .type = "PhoneDialed", .metric = "sessions", .data = d )
 
 ############################### FN: PULL DATA FOR CERTAIN PLATFORMS ############################### 
 

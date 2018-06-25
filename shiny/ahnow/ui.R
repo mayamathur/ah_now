@@ -44,9 +44,8 @@ navbarPage( "Animal Help Now! statistics", id = "navbar",
                       ), # end mainPanel
                       
                       mainPanel(
-                        span( textOutput("grand.total") ),
-                        span( textOutput("passedDate") ),
-                        span( textOutput("hardCodedDate") )
+                      span( textOutput("grand.total") ),
+                       tableOutput("table")
                         )
 
                       

@@ -23,33 +23,26 @@ function(input, output, session) {
   #   
   # })
   
-
+    output$table = renderTable({
+      stats = summary_stats( .type = input$type, .metric = input$metric, .data = d )
+      return( as.data.frame(stats$platform.tot ) )
+      
+      # fake = data.frame( X = rnorm(10),  Y=rnorm(10))
+      # return(fake)
+    })
+  
     output$grand.total = renderText({
       
-      # SHOULD PROBABLY MOVE THIS ELSEWHERE BECAUSE I DON'T THINK IT'S A GLOBAL VARIABLE
-      
-      #DOES NOT WORK: BOOKMARK
-      # d = get_data(metric = input$metric,
-      #              start.date = as.Date( input$startDate, origin = "1970-01-01" ),
-      #              end.date = as.Date( input$endDate, origin = "1970-01-01")  )
-      
+      # BOOKMARK: SHOULD PROBABLY MOVE THIS ELSEWHERE BECAUSE I DON'T THINK IT'S A GLOBAL VARIABLE
+      # THAT WAY THE TABLE CAN ALSO ACCESS IT
       # https://stackoverflow.com/questions/22834778/r-shiny-daterangeinput-format
       d = get_data(metric = input$metric,
                    start.date = format( input$dateRange[1] ),
                    end.date = format( input$dateRange[2] )  )
-      
-      # WORKS
-      # d = get_data(metric = input$metric,
-      #              start.date = "2017-01-01",
-      #              end.date = "2017-12-31"  )
-      
 
       stats = summary_stats( .type = input$type, .metric = input$metric, .data = d )
       
         return( paste( "Total ", input$metric, " for ", input$type, ": ", stats$grand.tot, sep="" ) )
-      
-      # WORKS
-      #return("Grand total: 5")
     
     })
   
