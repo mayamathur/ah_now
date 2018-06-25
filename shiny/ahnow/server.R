@@ -2,6 +2,7 @@ source("startup.R")
 
 function(input, output, session) {
   
+<<<<<<< HEAD
     # d <- reactive({
     #   get_data(metric = input$metric, start.date = "2017-01-01", end.date = "2017-12-31")
     # })
@@ -22,6 +23,7 @@ function(input, output, session) {
     
   })
   
+
     output$grand.total = renderText({
       
       # SHOULD PROBABLY MOVE THIS ELSEWHERE BECAUSE I DON'T THINK IT'S A GLOBAL VARIABLE
@@ -46,6 +48,7 @@ function(input, output, session) {
     
     })
   
+
     
     # output$curveOfExplainAway <- renderPlotly({
     #     

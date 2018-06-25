@@ -9,6 +9,7 @@
 # https://stackoverflow.com/questions/42665252/r-shiny-how-to-display-dataframe-in-shiny-app-using-shinydashboard-library
 
 # uses the full date range represented by the dataset
+
 summary_stats = function( .type, .metric = "sessions", .data ) {
 
   # totals by platform
@@ -22,6 +23,7 @@ summary_stats = function( .type, .metric = "sessions", .data ) {
   grand.tot = as.numeric( .data[ .data$type == .type, ]  %>%
                             #filter( type == .type) %>%
                             summarise( total = sum( !!sym(.metric) ) ) )
+
   
   return( list( grand.tot = grand.tot, 
                 platform.tot = platform.tot ) )
@@ -186,4 +188,5 @@ get_data = function( metric = "sessions",
 # d = get_data(start.date = start.date, end.date = end.date)
 # 
 # summary_stats( .type = "MapDirections", .metric = "sessions", .data = d )
+# summary_stats( type = "PhoneDialed", metric = "sessions", data = d )
 
