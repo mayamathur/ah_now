@@ -1,11 +1,10 @@
 
-library(shiny)
-library(EValue)
-library(plotly)
+library(googleAnalyticsR)
+library(dplyr)
+library(rlang)
+library(lubridate)
 
-# try to fix deployment problem
-library(purrr)
-library(plogr)
+ga_auth()
 
 # keeps original error messages
 options(shiny.sanitize.errors = FALSE)

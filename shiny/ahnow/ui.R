@@ -1,32 +1,35 @@
 
 
 source("startup.R")
+source("functions.R")
 
 
-# message to display if non-null true value
-nonnull.mess = 'Note: You are calculating a "non-null" E-value, i.e., an E-value for the minimum
-                amount of unmeasured confounding needed to move the estimate and confidence interval
-                to your specified true value rather than to the null value.'
-
-
-fluidPage( title = "E-value calculator",
+navbarPage( "Animal Help Now! statistics", id = "navbar",
             
-                      mainPanel(
+            tabPanel( "tab1",
+                      sidebarPanel( 
                         
-                          wellPanel(  HTML(paste("<b>We've moved!</b>",
                         
-                                      "The E-value calculator <a href='https://evalue.hmdc.harvard.edu/app/'>has moved</a>.",
-                                      sep="<br/><br/>")) ),
-
-                          width=6
-                          
-                      )
-)
+                        selectInput( "outcomeType", label = "Outcome type",
+                                     choices = c( "Relative risk / rate ratio" = "RR", 
+                                                  "Odds ratio (outcome prevalence <15%)" = "OR.rare",
+                                                  "Odds ratio (outcome prevalence >15%)" = "OR.com",
+                                                  "Hazard ratio (outcome prevalence <15%)" = "HR.rare",
+                                                  "Hazard ratio (outcome prevalence >15%)" = "HR.com",
+                                                  # "Linear regression coefficient" = "RG",
+                                                  "Standardized mean difference (d)" = "MD", 
+                                                  "Risk difference" = "RD" ) )
+                        
+                        
+                        #sidebarPanel(  HTML(paste("<b>Computing an E-value</b>")) )
+                        
+                      ), # end mainPanel
                       
-                     
-
-
-
+                      mainPanel(  span( textOutput("grand.total") ) )
+                      
+            ) # end tabPanel
+            
+)
 
 
 
