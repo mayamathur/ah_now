@@ -188,5 +188,5 @@ get_data = function( metric = "sessions",
 # d = get_data(start.date = start.date, end.date = end.date)
 # 
 # summary_stats( .type = "MapDirections", .metric = "sessions", .data = d )
-# summary_stats( type = "PhoneDialed", metric = "sessions", data = d )
+# summary_stats( .type = "MapDirections", .metric = "sessions", .data = d )
 
