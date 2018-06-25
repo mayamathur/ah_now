@@ -19,35 +19,45 @@ write.csv(meta, "ahnow_codebook.csv")
 
 ############################### HELPER FNS ############################### 
 
+library(googleAnalyticsR)
+ga_auth()
+
 # pulls data as for google_analytics, but merged across the platforms
-merge_platforms = function(start.date, end.date, ...){
+merge_platforms = function(metric = "sessions", start.date, end.date, ...){
   
   input_list <- as.list(substitute(list(...)))
   print(input_list)
-  
-  library(googleAnalyticsR)
-  ga_auth()
   
   # make id-platform key
   # from viewID in: ga_account_list()
   ids = c(75070560, 66336346, 75085662, 66319754)
   platforms = c("iPhone", "web", "android", "mweb")
-  
+
   datalist = lapply( 1:length(ids),
                      function(x) {
                        d.temp = google_analytics( ids[x], 
                         date_range = c(start.date, end.date),
-                        metrics = c("ga:sessions"),
-                        dimensions = c("ga:date",
-                                      "ga:eventCategory",
-                                       # "ga:eventAction",
-                                      #"ga:eventLabel",
-                                        "ga:region",
-                                        "ga:country"),
+                        metrics = c(metric),
+                        dimensions = c( "date",
+                                      # ifelse thing is per Dashboard > Report Configuration
+                                      ifelse( x == which( platforms == "android" ),
+                                              "eventAction",
+                                              "eventCategory" ),
+                                      "region",
+                                      "country"),
                         max = -1 )  # -1 means to return all rows
                        
+                       # merge info on which platform and ID we pulled
                        d.temp$viewID = ids[x]
                        d.temp$platform = platforms[x]
+                       
+                       
+                       # to allow happy merging
+                       if ( x == which( platforms == "android" ) ) {
+                         names(d.temp)[ names(d.temp) == "eventAction" ] = "type" 
+                       } else {
+                         names(d.temp)[ names(d.temp) == "eventCategory" ] = "type"
+                       }
                        
                        return(d.temp)
                        }
@@ -71,45 +81,45 @@ start.date = "2017-01-01"
 end.date = "2017-12-31"
 
 
-d = merge_platforms(start.date, end.date)
+d = merge_platforms(start.date = start.date, end.date = end.date)
 
 
 
-# sanity check
-# iPhone
-temp1 = google_analytics( 75070560,
-                           date_range = c(start.date, end.date),
-                           metrics = c("ga:sessions"),
-                           dimensions = c("ga:date",
-                                          "ga:eventCategory",
-                                          "ga:region",
-                                          "ga:country"),
-                          max = -1 )
-
-temp1 %>% filter( region == "Colorado" ) %>%
-  group_by( eventCategory ) %>%
-  summarise( total = sum(sessions) )
-
-# Debugging Android -- basically 
-# Android
-temp2 = google_analytics( 75085662,
-                          date_range = c(start.date, end.date),
-                          metrics = c("ga:sessions"),
-                          dimensions = c("ga:date",
-                                         "ga:eventAction",
-                                         "ga:region",
-                                         "ga:country"),
-                          max = -1 )
-
-temp2 %>% filter( region == "Colorado" ) %>%
-  group_by(eventAction) %>%
-  summarise( total = sum(sessions) )
-
-
+# # sanity check
+# # iPhone
+# temp1 = google_analytics( 75070560,
+#                            date_range = c(start.date, end.date),
+#                            metrics = c("ga:sessions"),
+#                            dimensions = c("ga:date",
+#                                           "ga:eventCategory",
+#                                           "ga:region",
+#                                           "ga:country"),
+#                           max = -1 )
+# 
+# temp1 %>% filter( region == "Colorado" ) %>%
+#   group_by( eventCategory ) %>%
+#   summarise( total = sum(sessions) )
+# 
+# # Debugging Android -- basically
+# # Android
+# temp2 = google_analytics( 75085662,
+#                           date_range = c(start.date, end.date),
+#                           metrics = c("ga:sessions"),
+#                           dimensions = c("ga:date",
+#                                          "ga:eventAction",
+#                                          "ga:region",
+#                                          "ga:country"),
+#                           max = -1 )
+# 
+# temp2 %>% filter( region == "Colorado" ) %>%
+#   group_by(eventAction) %>%
+#   summarise( total = sum(sessions) )
 
 
+
+# YESSSSSS! MATCHES!!!
 # same...
-d %>% filter( eventCategory == "PhoneDialed", region == "Colorado" ) %>%
+d %>% filter( type == "PhoneDialed", region == "Colorado" ) %>%
   group_by(platform) %>%
   summarise( total = sum(sessions) )
 # 73
