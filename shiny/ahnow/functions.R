@@ -37,6 +37,7 @@ summary_stats = function( .type, .metric = "sessions", .data ) {
 get_data = function( metric = "sessions",
                      start.date,
                      end.date ){
+  #browser()
   
   # make id-platform key
   # from viewID in: ga_account_list()
@@ -79,6 +80,24 @@ get_data = function( metric = "sessions",
 # ellipsis issue
 # https://stackoverflow.com/questions/3057341/how-to-use-rs-ellipsis-feature-when-writing-your-own-function
 
+
+# d = get_data(metric = "sessions",
+#                            start.date = "2017-01-01",
+#                            end.date = "2017-12-01"  )
+# 
+# 
+# x=1
+# d = google_analytics( ids[x], 
+#                   date_range = c("2017-01-01", "2017-12-01"),
+#                   metrics = c("sessions"),
+#                   dimensions = c( "date",
+#                                   # ifelse thing is per Dashboard > Report Configuration
+#                                   # ifelse( x == which( platforms == "android" ),
+#                                   #         "eventAction",
+#                                   #         "eventCategory" ),
+#                                   "region",
+#                                   "country"),
+#                   max = -1 )
 
 # ############################### FN: MAKE CHLOROPLETH ############################### 
 # 

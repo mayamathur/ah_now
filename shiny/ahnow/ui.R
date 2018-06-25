@@ -13,14 +13,10 @@ navbarPage( "Animal Help Now! statistics", id = "navbar",
                                   label = "Password",
                                   ),
                         
-                        dateInput(inputId = "startDate",
-                                  label = "Start date",
-                                  value = "2017-12-31",
-                                  format = "yyyy-mm-dd"),
-                        
-                        dateInput(inputId = "endDate",
-                                  label = "Start date",
-                                  value = "2017-01-01",
+                        dateRangeInput(inputId = "dateRange",
+                                  label = "Date range",
+                                  start = "2017-1-1",
+                                  end = "2017-12-31",
                                   format = "yyyy-mm-dd"),
                         
                         selectInput( "type",

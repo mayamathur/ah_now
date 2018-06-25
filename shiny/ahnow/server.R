@@ -9,34 +9,39 @@ function(input, output, session) {
 
   #d = get_data(metric = input$metric, start.date = "2017-01-01", end.date = "2017-12-31")
   
-  # BOOKMARK: THIS ILLUSTRATES THE BELOW PROBLEM BECAUSE PASSED DATE IS ALL MESSED UP
   # debugging to understand below issue
-  output$passedDate = renderText({
-    
-    return( as.Date(input$startDate) )
-    
-  })
-  
-  output$hardCodedDate = renderText({
-    
-    return( "2017-01-01" )
-    
-  })
+  # output$passedDate = renderText({
+  #   
+  #   #return( as.character(str(input$startDate)))
+  #   return( as.Date(input$dateRange, origin = "1970-01-01") )
+  #   
+  # })
+  # 
+  # output$hardCodedDate = renderText({
+  #   
+  #   return( "2017-01-01" )
+  #   
+  # })
   
 
     output$grand.total = renderText({
       
       # SHOULD PROBABLY MOVE THIS ELSEWHERE BECAUSE I DON'T THINK IT'S A GLOBAL VARIABLE
       
-      # DOES NOT WORK: BOOKMARK
+      #DOES NOT WORK: BOOKMARK
       # d = get_data(metric = input$metric,
-      #              start.date = as.Date( input$startDate ),
-      #              end.date = as.Date( input$endDate)  )
+      #              start.date = as.Date( input$startDate, origin = "1970-01-01" ),
+      #              end.date = as.Date( input$endDate, origin = "1970-01-01")  )
+      
+      # https://stackoverflow.com/questions/22834778/r-shiny-daterangeinput-format
+      d = get_data(metric = input$metric,
+                   start.date = format( input$dateRange[1] ),
+                   end.date = format( input$dateRange[2] )  )
       
       # WORKS
-      d = get_data(metric = input$metric,
-                   start.date = "2017-01-01",
-                   end.date = "2017-12-31"  )
+      # d = get_data(metric = input$metric,
+      #              start.date = "2017-01-01",
+      #              end.date = "2017-12-31"  )
       
 
       stats = summary_stats( .type = input$type, .metric = input$metric, .data = d )
