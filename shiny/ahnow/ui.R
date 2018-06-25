@@ -10,7 +10,7 @@ navbarPage( "AHNow statistics", id = "navbar",
                       sidebarPanel( 
                         
                         textInput(inputId = "password",
-                                  label = "Password",
+                                  label = "Password"
                                   ),
                         
                         dateRangeInput(inputId = "dateRange",
@@ -31,26 +31,27 @@ navbarPage( "AHNow statistics", id = "navbar",
                                      label = "Metric to analyze",
                                      choices = c( "Sessions" = "sessions"
                                                  # "Users" = "users"
-                                     ) ),
-                        
-                        selectInput( "plotType",
-                                     label = "Plot type",
-                                     choices = c( "Map" = "map",
-                                                  "Line" = "line"
-                                                
                                      ) )
-
-                        
-                      ), # end mainPanel
-                      
-                      mainPanel(
-                      span( textOutput("grand.total") ),
-                       tableOutput("table"),
-                      plotlyOutput("mapPlot", width = "400px", height = "400px")
                         )
 
+                        
+                      ), # end tabPanel
                       
-            ) # end tabPanel
+                      mainPanel(
+                        
+                      h3("Grand total"),
+                      span( textOutput("grand.total") ),
+                      
+                      h3("Totals by platform"),
+                       tableOutput("table"),
+                      
+                      h3("Heat map"),
+                      plotlyOutput("mapPlot"),
+                      
+                      h3("Line plot"),
+                      plotlyOutput("linePlot")
+                      ) # end mainPanel
+                    
             
 )
 

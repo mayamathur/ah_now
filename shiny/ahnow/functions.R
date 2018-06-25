@@ -99,101 +99,109 @@ get_data = function( metric = "sessions",
 #                                   "country"),
 #                   max = -1 )
 
-# ############################### FN: MAKE CHLOROPLETH ############################### 
-# 
-# 
-# # make the plots interactive as in Corinne's code
-# chloropleth = function( type,
-#                         platforms = c("iPhone", "web", "android", "mweb"),
-#                         start.date,
-#                         end.date ) {
-#   
-#   event = "PhoneDialed"
-#   
-#   
-#   # reshape to have 1 row per state
-#   library(dplyr)
-#   
-#   d2 = d %>% filter( country == "United States") %>%
-#     filter( type == event ) %>%
-#     group_by(region) %>%
-#     summarise( total = sum(sessions) )
-#   
-#   d2$region = tolower(d2$region)
-#   
-#   
-#   
-#   # make placeholder rows for nonexistent states
-#   library(fiftystater)
-#   state.names = unique( fifty_states$id )
-#   
-#   d3 = data.frame( region = state.names, total = 0 )
-#   
-#   d4 = merge( d3, d2, all.x = TRUE, by.x = "region", by.y = "region" )
-#   
-#   names(d4)[ names(d4) == "total.y" ] = "total"
-#   d4$total[ is.na(d4$total) ] = NA
-#   
-#   
-#   # https://cran.r-project.org/web/packages/fiftystater/vignettes/fiftystater.html
-#   library(ggplot2)
-#   
-#   
-#   data("fifty_states") # this line is optional due to lazy data loading
-#   
-#   library("RColorBrewer")
-#   myPalette <- colorRampPalette(brewer.pal(50, "YlOrBr"))
-#   sc <- scale_fill_gradientn(colours = myPalette(100), limits=c(0, max(d4$total, na.rm=TRUE)))
-#   
-#   title = paste( "Frequency of phone dials (all platforms), ", start.date, " to ", end.date, sep="" )
-#   
-#   # map_id creates the aesthetic mapping to the state name column in your data
-#   p <- ggplot(d4, aes(map_id = region)) + 
-#     # map points to the fifty_states shape data
-#     geom_map(aes(fill = total), map = fifty_states) + 
-#     expand_limits(x = fifty_states$long, y = fifty_states$lat) +
-#     coord_map() +
-#     scale_fill_gradientn( colours = myPalette(100),
-#                           limits=c(0, max(d4$total) ),
-#                           na.value = "lightgray" ) +
-#     scale_x_continuous(breaks = NULL) + 
-#     scale_y_continuous(breaks = NULL) +
-#     labs(x = "", y = "") +
-#     theme(legend.position = "bottom", 
-#           panel.background = element_blank()) + 
-#     #guides(fill=guide_legend(title=" ")) +
-#     ggtitle(title)
-#   
-#   p
-#   # add border boxes to AK/HI
-#   p + fifty_states_inset_boxes() 
-#   
-# }
-# 
-# 
-# ############################### FN: MAKE LINE PLOT OF EVENTS OVER TIME ############################### 
-# 
-# line_plot( platforms = c("iPhone", "web", "android", "mweb"),
-#            start.date,
-#            end.date ) {
-#   
-#   ( d.month = d %>% filter( country == "United States", eventCategory == "PhoneDialed" ) %>%
-#       group_by(month) %>%
-#       summarise( total = sum(sessions) ) )
-#   
-#   # how are dates distributed?
-#   library(lubridate)
-#   table( month(d$date) )
-#   
-#   library(ggplot2)
-#   
-#   ggplot( data = d.month, aes(x = month, y = total) ) + 
-#     geom_line() +
-#     scale_x_continuous( breaks = seq(1, 12, 1)) +
-#     theme_classic()
-#   
-# }
+############################### FN: MAKE CHLOROPLETH ###############################
 
+
+# make the plots interactive as in Corinne's code
+chloropleth = function( .type,
+                        .metric,
+                        .platforms = c("iPhone", "web", "android", "mweb"),
+                        .start.date,
+                        .end.date,
+                        .data ) {
+
+  # reshape to have 1 row per state
+  d2 = .data[ .data$type == .type, ] %>%
+    filter( country == "United States") %>%
+    group_by(region) %>%
+    summarise( total = sum( !!sym(.metric) ) )
+
+  d2$region = tolower(d2$region)
+
+
+  # https://cran.r-project.org/web/packages/fiftystater/vignettes/fiftystater.html
+  # make placeholder rows for nonexistent states
+  state.names = unique( fifty_states$id )
+
+  d3 = data.frame( region = state.names, total = 0 )
+
+  d4 = merge( d3, d2, all.x = TRUE, by.x = "region", by.y = "region" )
+
+  names(d4)[ names(d4) == "total.y" ] = "total"
+  d4$total[ is.na(d4$total) ] = NA
+
+
+  library("RColorBrewer")
+  myPalette <- colorRampPalette(brewer.pal(50, "YlOrBr"))
+  sc <- scale_fill_gradientn(colours = myPalette(100), limits=c(0, max(d4$total, na.rm=TRUE)))
+
+  title = paste( "Total ", .metric, " of ", .type, ", ", .start.date, " to ", .end.date, sep="" )
+
+  # map_id creates the aesthetic mapping to the state name column in your data
+  p <- ggplot(d4, aes(map_id = region)) +
+    # map points to the fifty_states shape data
+    geom_map(aes(fill = total), map = fifty_states) +
+    expand_limits(x = fifty_states$long, y = fifty_states$lat) +
+    coord_map() +
+    scale_fill_gradientn( colours = myPalette(100),
+                          limits=c(0, max(d4$total) ),
+                          na.value = "lightgray" ) +
+    scale_x_continuous(breaks = NULL) +
+    scale_y_continuous(breaks = NULL) +
+    labs(x = "", y = "") +
+    # note that one of these things in theme() removes the heatmap legend
+    theme(legend.position = "bottom",
+          panel.background = element_blank(),
+          axis.line=element_blank(),
+          axis.text.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks=element_blank(),
+          axis.title.x=element_blank(),
+          axis.title.y=element_blank()
+          ) +
+    guides(fill=guide_legend(title=" ")) +
+    ggtitle(title)
+
+  # add border boxes to AK/HI
+  p + fifty_states_inset_boxes()
+
+}
+
+
+# chloropleth( .type = "PhoneDialed",
+#                         .metric = "sessions",
+#                         .platforms = c("iPhone", "web", "android", "mweb"),
+#                         .start.date = "2017-01-01",
+#                         .end.date = "2017-12-31",
+#                         .data=d )
+
+
+############################### FN: MAKE LINE PLOT OF EVENTS OVER TIME ###############################
+
+line_plot = function( .data,
+           .type,
+           .metric,
+            .platforms = c("iPhone", "web", "android", "mweb"),
+           .start.date,
+           .end.date ) {
+
+  d.month = .data[ .data$type == .type, ] %>% filter( country == "United States" ) %>%
+      group_by(month) %>%
+      summarise( total = sum( !!sym(.metric) ) )
+
+  ggplot( data = d.month, aes(x = month, y = total) ) +
+    geom_line() +
+    scale_x_continuous( breaks = seq(1, 12, 1) ) +
+    theme_classic()
+}
+
+
+# line_plot( .type = "PhoneDialed",
+#                         .metric = "sessions",
+#                         .platforms = c("iPhone", "web", "android", "mweb"),
+#                         .start.date = "2017-01-01",
+#                         .end.date = "2017-11-31",
+#                         .data=d )
 
 ############################### TEST ############################### 
 
