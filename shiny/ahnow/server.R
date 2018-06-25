@@ -3,27 +3,18 @@ source("startup.R")
 function(input, output, session) {
   
 
-    # d <- reactive({
-    #   get_data(metric = input$metric, start.date = "2017-01-01", end.date = "2017-12-31")
-    # })
+    reactiveData <- reactive({
+      get_data(metric = input$metric,
+                   start.date = format( input$dateRange[1] ),
+                   end.date = format( input$dateRange[2] ) )
+    })
 
   #d = get_data(metric = input$metric, start.date = "2017-01-01", end.date = "2017-12-31")
   
-  # debugging to understand below issue
-  # output$passedDate = renderText({
-  #   
-  #   #return( as.character(str(input$startDate)))
-  #   return( as.Date(input$dateRange, origin = "1970-01-01") )
-  #   
-  # })
-  # 
-  # output$hardCodedDate = renderText({
-  #   
-  #   return( "2017-01-01" )
-  #   
-  # })
   
     output$table = renderTable({
+      d = reactiveData()
+      
       stats = summary_stats( .type = input$type, .metric = input$metric, .data = d )
       return( as.data.frame(stats$platform.tot ) )
       
@@ -36,9 +27,11 @@ function(input, output, session) {
       # BOOKMARK: SHOULD PROBABLY MOVE THIS ELSEWHERE BECAUSE I DON'T THINK IT'S A GLOBAL VARIABLE
       # THAT WAY THE TABLE CAN ALSO ACCESS IT
       # https://stackoverflow.com/questions/22834778/r-shiny-daterangeinput-format
-      d = get_data(metric = input$metric,
-                   start.date = format( input$dateRange[1] ),
-                   end.date = format( input$dateRange[2] )  )
+      # d = get_data(metric = input$metric,
+      #              start.date = format( input$dateRange[1] ),
+      #              end.date = format( input$dateRange[2] )  )
+      
+      d = reactiveData()
 
       stats = summary_stats( .type = input$type, .metric = input$metric, .data = d )
       
