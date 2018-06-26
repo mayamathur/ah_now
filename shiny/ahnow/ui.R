@@ -48,7 +48,8 @@ navbarPage( "AHNow statistics", id = "navbar",
                       mainPanel(
                         
                       h3("Total across platforms"),
-                      span( withSpinner( textOutput("grand.total") ) ),
+                      span( textOutput("grand.total") ),
+                      # spinner doesn't work on this one
                       
                       h3("Totals by platform"),
                        withSpinner( tableOutput("table") ),
