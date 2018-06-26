@@ -1,0 +1,12 @@
+name: ahnow
+title: ahnow
+username:
+account: mmathur
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 367270
+bundleId: 1448765
+url: https://mmathur.shinyapps.io/ahnow/
+when: 1529971384.95233
+asMultiple: FALSE
+asStatic: FALSE
