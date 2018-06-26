@@ -1,7 +1,7 @@
 
-
-# should pull new dataset from GA each time user changes start or end date, but not otherwise
-
+# TO DO: 
+#  make password work
+#  have checkboxes to include only certain platforms in heat map and line plot
 
 ############################### FN: SUMMARIZE EVENTS ############################### 
 
@@ -111,7 +111,7 @@ chloropleth = function( .type,
                         .data ) {
 
   # reshape to have 1 row per state
-  d2 = .data[ .data$type == .type, ] %>%
+  d2 = .data[ .data$type == .type & .data$platform %in% .platforms, ] %>%
     filter( country == "United States") %>%
     group_by(region) %>%
     summarise( total = sum( !!sym(.metric) ) )
@@ -185,7 +185,7 @@ line_plot = function( .data,
            .start.date,
            .end.date ) {
 
-  d.month = .data[ .data$type == .type, ] %>% filter( country == "United States" ) %>%
+  d.month = .data[ .data$type == .type & .data$platform %in% .platforms, ] %>% filter( country == "United States" ) %>%
       group_by(month) %>%
       summarise( total = sum( !!sym(.metric) ) )
 
