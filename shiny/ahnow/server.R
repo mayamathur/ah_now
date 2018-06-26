@@ -3,10 +3,15 @@ source("startup.R")
 function(input, output, session) {
   
     reactiveData <- reactive({
-      get_data(metric = input$metric,
-                   start.date = format( input$dateRange[1] ),
-                   end.date = format( input$dateRange[2] ) )
+      if(input$password == "osprey") {
+        get_data(metric = input$metric,
+                 start.date = format( input$dateRange[1] ),
+                 end.date = format( input$dateRange[2] ) )
+      } else {
+        NULL
+      }
     })
+    
 
     output$table = renderTable({
       d = reactiveData()
@@ -32,7 +37,7 @@ function(input, output, session) {
       ggplotly(
         chloropleth( .type = input$type,
                      .metric = input$metric,
-                     .platforms = c("iPhone", "web", "android", "mweb"),
+                     .platforms = input$plotPlatforms,
                      .start.date = format( input$dateRange[1] ),
                      .end.date = format( input$dateRange[2] ),
                      .data=d )
@@ -46,7 +51,7 @@ function(input, output, session) {
       ggplotly(
         line_plot( .type = input$type,
                    .metric = input$metric,
-                   .platforms = c("iPhone", "web", "android", "mweb"),
+                   .platforms = input$plotPlatforms,
                    .start.date = format( input$dateRange[1] ),
                    .end.date = format( input$dateRange[2] ),
                    .data=d )

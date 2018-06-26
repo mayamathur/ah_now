@@ -10,7 +10,8 @@ navbarPage( "AHNow statistics", id = "navbar",
                       sidebarPanel( 
                         
                         textInput(inputId = "password",
-                                  label = "Password"
+                                  label = "Password",
+                                  value=""
                                   ),
                         
                         dateRangeInput(inputId = "dateRange",
@@ -31,7 +32,14 @@ navbarPage( "AHNow statistics", id = "navbar",
                                      label = "Metric to analyze",
                                      choices = c( "Sessions" = "sessions"
                                                  # "Users" = "users"
-                                     ) )
+                                     ) ),
+                        
+                        checkboxGroupInput("plotPlatforms", "Platforms to show in plot:",
+                                           c("iPhone" = "iPhone",
+                                             "Android" = "android",
+                                             "Mobile web" = "mweb",
+                                             "Regular website" = "web"),
+                                           selected = c("iPhone", "android", "mweb", "web") )
                         )
 
                         
@@ -39,17 +47,17 @@ navbarPage( "AHNow statistics", id = "navbar",
                       
                       mainPanel(
                         
-                      h3("Grand total"),
-                      span( textOutput("grand.total") ),
+                      h3("Total across platforms"),
+                      span( withSpinner( textOutput("grand.total") ) ),
                       
                       h3("Totals by platform"),
-                       tableOutput("table"),
+                       withSpinner( tableOutput("table") ),
                       
                       h3("Heat map"),
-                      plotlyOutput("mapPlot"),
+                      withSpinner( plotlyOutput("mapPlot", width="750px", height="500px") ),
                       
                       h3("Line plot"),
-                      plotlyOutput("linePlot")
+                      withSpinner( plotlyOutput("linePlot") )
                       ) # end mainPanel
                     
             
