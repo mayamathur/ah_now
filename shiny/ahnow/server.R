@@ -59,6 +59,25 @@ function(input, output, session) {
       
     })
     
+    output$comparison = renderTable({
+      # BOOKMARK: FILL ME IN
+
+      d = reactiveData()
+
+      # counts for first slice
+      summaryA = d %>%
+                      #filter( type == input$type2) %>%
+                      #filter( platform %in% input$platforms2A ) %>%
+                      filter( region %in% input$region2A ) %>%
+                      #filter( date >= input$dateRange2A[1] & date <= input$dateRange2A[2] ) %>%
+                      summarise( total = sum( !!sym(input$metric2) ) )
+      
+      #totalA = summaryA$total
+    
+      return(summaryA)
+      #return( as.character(totalA) )
+    })
+    
 }
 
 

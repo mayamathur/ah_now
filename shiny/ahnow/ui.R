@@ -3,7 +3,6 @@
 source("startup.R")
 source("functions.R")
 
-
 navbarPage( "AHNow statistics", id = "navbar",
             
             tabPanel( "Basics",
@@ -40,26 +39,81 @@ navbarPage( "AHNow statistics", id = "navbar",
                                              "Mobile web" = "mweb",
                                              "Regular website" = "web"),
                                            selected = c("iPhone", "android", "mweb", "web") )
-                        )
+                        ),
+                      
+                      mainPanel(
+                        
+                        h3("Total across platforms"),
+                        span( textOutput("grand.total") ),
+                        # spinner doesn't work on this one
+                        
+                        h3("Totals by platform"),
+                        withSpinner( tableOutput("table") ),
+                        
+                        h3("Heat map"),
+                        withSpinner( plotlyOutput("mapPlot", width="750px", height="500px") ),
+                        
+                        h3("Line plot"),
+                        withSpinner( plotlyOutput("linePlot") )
+                      ) # end mainPanel
 
                         
                       ), # end tabPanel
                       
-                      mainPanel(
+                     
+            
+              tabPanel( "Compare",
                         
-                      h3("Total across platforms"),
-                      span( textOutput("grand.total") ),
-                      # spinner doesn't work on this one
+                        sidebarPanel( 
+                          h4("Compare with respect to:"),
+                          selectInput( "type2",
+                                       label = "Event type",
+                                       choices = c( "Phone dialed" = "PhoneDialed",
+                                                    "Animal type filter" = "AnimalTypeFilter",
+                                                    "Case flow" = "CaseFlow",
+                                                    "Helper detail displayed" = "HelperDetail_Displayed"
+                                       ) ),
+                          
+                          selectInput( "metric2",
+                                       label = "Metric to analyze",
+                                       choices = c( "Sessions" = "sessions"
+                                                    # "Users" = "users"
+                                       ) ) ),
+                        
+                        sidebarPanel(
+                          h4("Data slice #1"),
+                          
+                          dateRangeInput(inputId = "dateRange2A",
+                                         label = "Date range",
+                                         start = "2017-1-1",
+                                         end = "2017-12-31",
+                                         format = "yyyy-mm-dd"),
+                          
+                          checkboxGroupInput("platforms2A", "Platforms",
+                                             c("iPhone" = "iPhone",
+                                               "Android" = "android",
+                                               "Mobile web" = "mweb",
+                                               "Regular website" = "web"),
+                                             selected = c("iPhone", "android", "mweb", "web") ),
+                          
+                          selectInput( "region2A",
+                                       label = "Region",
+                                       choices = c( tolower(state.name) )
+                                       )
+                        ),
+                        
+                        sidebarPanel( 
+                          h4("Data slice #1")
+                          
+                          
+                          ),
                       
-                      h3("Totals by platform"),
-                       withSpinner( tableOutput("table") ),
-                      
-                      h3("Heat map"),
-                      withSpinner( plotlyOutput("mapPlot", width="750px", height="500px") ),
-                      
-                      h3("Line plot"),
-                      withSpinner( plotlyOutput("linePlot") )
-                      ) # end mainPanel
+                        mainPanel(
+                          h4("Output"),
+                          withSpinner( tableOutput("comparison") )
+                          #span( textOutput("comparison") )
+                        )
+                  ) # end tabPanel
                     
             
 )
