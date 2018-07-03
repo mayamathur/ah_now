@@ -37,7 +37,8 @@ summary_stats = function( .type, .metric = "sessions", .data ) {
 # pulls data as for google_analytics, but merged across the platforms
 get_data = function( metric = "sessions",
                      start.date,
-                     end.date ){
+                     end.date,
+                     region = NA ){
   
   # make id-platform key
   # from viewID in: ga_account_list()
@@ -75,6 +76,12 @@ get_data = function( metric = "sessions",
   )
   library(data.table)
   d = rbindlist(datalist)
+  
+  if (! is.na(region) ) {
+    d = d[ tolower(d$region) == region, ]
+  }
+  
+  return(d)
 }
 
 # ellipsis issue

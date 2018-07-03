@@ -6,19 +6,19 @@ source("functions.R")
 navbarPage( "AHNow statistics", id = "navbar",
             
             tabPanel( "Basics",
-                      sidebarPanel( 
-                        
+                      sidebarPanel(
+
                         textInput(inputId = "password",
                                   label = "Password",
                                   value=""
                                   ),
-                        
+
                         dateRangeInput(inputId = "dateRange",
                                   label = "Date range",
                                   start = "2017-1-1",
                                   end = "2017-12-31",
                                   format = "yyyy-mm-dd"),
-                        
+
                         selectInput( "type",
                                      label = "Event type",
                                      choices = c( "Phone dialed" = "PhoneDialed",
@@ -26,13 +26,13 @@ navbarPage( "AHNow statistics", id = "navbar",
                                                   "Case flow" = "CaseFlow",
                                                   "Helper detail displayed" = "HelperDetail_Displayed"
                                                    ) ),
-                        
+
                         selectInput( "metric",
                                      label = "Metric to analyze",
                                      choices = c( "Sessions" = "sessions"
                                                  # "Users" = "users"
                                      ) ),
-                        
+
                         checkboxGroupInput("plotPlatforms", "Platforms to show in plot:",
                                            c("iPhone" = "iPhone",
                                              "Android" = "android",
@@ -40,24 +40,24 @@ navbarPage( "AHNow statistics", id = "navbar",
                                              "Regular website" = "web"),
                                            selected = c("iPhone", "android", "mweb", "web") )
                         ),
-                      
+
                       mainPanel(
-                        
+
                         h3("Total across platforms"),
                         span( textOutput("grand.total") ),
                         # spinner doesn't work on this one
-                        
+
                         h3("Totals by platform"),
                         withSpinner( tableOutput("table") ),
-                        
+
                         h3("Heat map"),
                         withSpinner( plotlyOutput("mapPlot", width="750px", height="500px") ),
-                        
+
                         h3("Line plot"),
                         withSpinner( plotlyOutput("linePlot") )
                       ) # end mainPanel
 
-                        
+
                       ), # end tabPanel
                       
                      
@@ -83,6 +83,7 @@ navbarPage( "AHNow statistics", id = "navbar",
                         sidebarPanel(
                           h4("Data slice #1"),
                           
+                          
                           dateRangeInput(inputId = "dateRange2A",
                                          label = "Date range",
                                          start = "2017-1-1",
@@ -95,23 +96,22 @@ navbarPage( "AHNow statistics", id = "navbar",
                                                "Mobile web" = "mweb",
                                                "Regular website" = "web"),
                                              selected = c("iPhone", "android", "mweb", "web") ),
-                          
+                          # BOOKMARK
                           selectInput( "region2A",
                                        label = "Region",
                                        choices = c( tolower(state.name) )
                                        )
+        
                         ),
                         
                         sidebarPanel( 
-                          h4("Data slice #1")
-                          
-                          
+                          h4("Data slice #2")
                           ),
                       
                         mainPanel(
                           h4("Output"),
-                          withSpinner( tableOutput("comparison") )
-                          #span( textOutput("comparison") )
+                          span( textOutput("fake") )
+                          #withSpinner( tableOutput("comparison") )
                         )
                   ) # end tabPanel
                     
