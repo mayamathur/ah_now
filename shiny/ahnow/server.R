@@ -6,7 +6,7 @@ function(input, output, session) {
       if(input$password == "osprey") {
         
         # ~~~ NOT USING API
-        get_data_no_API(metric = input$metric,
+        get_data(metric = input$metric,
                  start.date = format( input$dateRange[1] ),
                  end.date = format( input$dateRange[2] ) )
       } else {
@@ -20,18 +20,17 @@ function(input, output, session) {
       #           start.date = "2017-01-01",
       #           end.date = "2017-12-31" )
       
-      #browser()
-      
-      # WORKS!!!!!
-      d = da[ as.Date(da$date) >= format( input$dateRange2A[1] ) &
-                   as.Date(da$date) <= format( input$dateRange2A[2] ) &
-                   tolower(da$region) == input$region2A, ]
-      
-      # DOES NOT WORK!!!
-        # d = get_data_no_API( metric = input$metric2,
-        #          start.date = format( input$dateRange2A[1] ),
-        #          end.date = format( input$dateRange2A[2] ),
-        #          region = input$region2A )
+      # # WORKS
+      #   d = get_data_no_API( metric = input$metric2,
+      #            start.date = format( input$dateRange2A[1] ),
+      #            end.date = format( input$dateRange2A[2] ),
+      #            region = input$region2A )
+        
+      # DOES NOT WORK
+        d = get_data( metric = input$metric2,
+                             start.date = format( input$dateRange2A[1] ),
+                             end.date = format( input$dateRange2A[2] ),
+                             region = input$region2A )
         
         return(d)
     #  } else {

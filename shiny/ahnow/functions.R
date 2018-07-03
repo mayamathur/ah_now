@@ -36,31 +36,34 @@ summary_stats = function( .type, .metric = "sessions", .data ) {
 
 # MAINLY FOR DEBUGGING (AVOID API CALL)
 
-get_data_no_API = function( metric = "sessions",
-                            start.date,
-                            end.date,
-                            region = NA ){
-  
-  # check if we have the global variable for the dataset
-  if( !exists("da") ) {
-    setwd("~/Dropbox/Personal computer/Independent studies/Animal Help Now/Analyses/ah_now_git/shiny/ahnow")
-    da = read.csv("2018-07-03_session_data.csv")
-  }
-
-  da = da[ , names(da) != "X" ]
-  
-  
-  # BOOKMARK: THIS LINE IS IMPORTANT!! NEED THE FORMAT AND THE AS.DATE EXACTLY LIKE THIS, I THINK
-  # just subset the pre-downloaded data
-  d = da %>% filter( as.Date(date) >= format(start.date) &
-                       as.Date(date) <= format(end.date) )
-
-  if ( !is.na(region) ) {
-    d = d %>% filter( tolower(region) == region )
-  }
-  
-  return(d)
-}
+# get_data_no_API = function( metric = "sessions",
+#                             start.date,
+#                             end.date,
+#                             region = NA ){
+#   
+#   # # check if we have the global variable for the dataset
+#   # if( !exists("da") ) {
+#   #   setwd("~/Dropbox/Personal computer/Independent studies/Animal Help Now/Analyses/ah_now_git/shiny/ahnow")
+#   #   da = read.csv("2018-07-03_session_data.csv")
+#   # }
+#   # 
+#   # da = da[ , names(da) != "X" ]
+#   
+#   d = da[ as.Date(da$date) >= format( start.date ) &
+#                as.Date(da$date) <= format( end.date ) &
+#                tolower(da$region) == region, ]
+#   
+#   
+#   # 
+#   # d = da %>% filter( as.Date(date) >= format(start.date) &
+#   #                      as.Date(date) <= format(end.date) )
+#   # 
+#   # if ( !is.na(region) ) {
+#   #   d = d %>% filter( tolower(region) == region )
+#   # }
+#   # 
+#   return(d)
+# }
 
 
 # d2 = get_data_no_API(metric = "sessions",
@@ -80,7 +83,7 @@ get_data = function( metric = "sessions",
                      start.date,
                      end.date,
                      region = NA ){
-  
+
   # make id-platform key
   # from viewID in: ga_account_list()
   ids = c(75070560, 66336346, 75085662, 66319754)
@@ -89,7 +92,7 @@ get_data = function( metric = "sessions",
   datalist = lapply( 1:length(ids),
                      function(x) {
                        d.temp = google_analytics( ids[x], 
-                                                  date_range = c(start.date, end.date),
+                                                  date_range = c( format(start.date), format(end.date) ),
                                                   metrics = c(metric),
                                                   dimensions = c( "date",
                                                                   # ifelse thing is per Dashboard > Report Configuration
@@ -119,7 +122,12 @@ get_data = function( metric = "sessions",
   d = rbindlist(datalist)
   
   if (! is.na(region) ) {
-    d = d[ tolower(d$region) == region, ]
+    # doesn't work for mysterious reasons
+   # d = d[ tolower(d$region) == region, ]
+    
+    ind = tolower(d$region) == region
+    d = d[ind,]
+
   }
   
   return(d)
