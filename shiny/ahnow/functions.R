@@ -34,6 +34,47 @@ summary_stats = function( .type, .metric = "sessions", .data ) {
 
 ############################### FN: PULL DATA FOR CERTAIN PLATFORMS ############################### 
 
+# MAINLY FOR DEBUGGING (AVOID API CALL)
+
+get_data_no_API = function( metric = "sessions",
+                            start.date,
+                            end.date,
+                            region = NA ){
+  
+  # check if we have the global variable for the dataset
+  if( !exists("da") ) {
+    setwd("~/Dropbox/Personal computer/Independent studies/Animal Help Now/Analyses/ah_now_git/shiny/ahnow")
+    da = read.csv("2018-07-03_session_data.csv")
+  }
+
+  da = da[ , names(da) != "X" ]
+  
+  
+  # BOOKMARK: THIS LINE IS IMPORTANT!! NEED THE FORMAT AND THE AS.DATE EXACTLY LIKE THIS, I THINK
+  # just subset the pre-downloaded data
+  d = da %>% filter( as.Date(date) >= format(start.date) &
+                       as.Date(date) <= format(end.date) )
+
+  if ( !is.na(region) ) {
+    d = d %>% filter( tolower(region) == region )
+  }
+  
+  return(d)
+}
+
+
+# d2 = get_data_no_API(metric = "sessions",
+#                      start.date = "2017-01-01",
+#                      end.date = "2017-12-01"  )
+# 
+# d2 = get_data_no_API(metric = "sessions",
+#                      start.date = "2017-01-01",
+#                      end.date = "2017-12-01",
+#                      region = "colorado" )
+
+
+
+
 # pulls data as for google_analytics, but merged across the platforms
 get_data = function( metric = "sessions",
                      start.date,
@@ -88,9 +129,16 @@ get_data = function( metric = "sessions",
 # https://stackoverflow.com/questions/3057341/how-to-use-rs-ellipsis-feature-when-writing-your-own-function
 
 
+
+
+
 # d = get_data(metric = "sessions",
 #                            start.date = "2017-01-01",
 #                            end.date = "2017-12-01"  )
+
+
+
+
 # 
 # 
 # x=1
