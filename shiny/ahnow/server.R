@@ -5,8 +5,6 @@ function(input, output, session) {
     reactiveData <- reactive({
       if(input$password == "osprey") {
         
-        browser()
-        
         # subset to chosen platforms
         get_data( metric = input$metric,
                  start.date = format( input$dateRange[1] ),
@@ -82,13 +80,15 @@ function(input, output, session) {
     # animated map
     # Example 3 of: https://magesblog.com/post/2013-02-26-first-steps-of-using-googlevis-on-shiny/
     output$aniMap = renderGvis({
+      
       d = reactiveData()
        temp = d[ d$type == input$type, ]
+      
        
-       #browser()
+       temp$latlon = paste( temp$latitude, ":", temp$longitude, sep="" )
 
       gvisGeoChart( temp,
-                    locationvar = "latitude:longitude",
+                    locationvar = "latlon",
                       colorvar = input$metric )
 
     })
