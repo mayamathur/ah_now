@@ -82,56 +82,89 @@ summary_stats = function( .type, .metric = "sessions", .data ) {
 get_data = function( metric = "sessions",
                      start.date,
                      end.date,
-                     region = NA ){
+                     region = NA,
+                     .platforms = c("iPhone", "android", "mweb", "web") ){
+
 
   # make id-platform key
   # from viewID in: ga_account_list()
   ids = c(75070560, 66336346, 75085662, 66319754)
   platforms = c("iPhone", "web", "android", "mweb")
   
+  # if not using all platforms
+  if( length( .platforms ) < 4 ) {
+    ids = ids[ platforms %in% .platforms ]
+    platforms = platforms[ platforms %in% .platforms ]
+  }
+  
   datalist = lapply( 1:length(ids),
                      function(x) {
-                       d.temp = google_analytics( ids[x], 
-                                                  date_range = c( format(start.date), format(end.date) ),
-                                                  metrics = c(metric),
-                                                  dimensions = c( "date",
-                                                                  # ifelse thing is per Dashboard > Report Configuration
-                                                                  ifelse( x == which( platforms == "android" ),
-                                                                          "eventAction",
-                                                                          "eventCategory" ),
-                                                                  "region",
-                                                                  "country"),
-                                                  max = -1 )  # -1 means to return all rows
-                       
-                       # merge info on which platform and ID we pulled
-                       d.temp$viewID = ids[x]
-                       d.temp$platform = platforms[x]
-                       d.temp$month = month(d.temp$date)
-                       
-                       # to allow happy merging
-                       if ( x == which( platforms == "android" ) ) {
-                         names(d.temp)[ names(d.temp) == "eventAction" ] = "type" 
-                       } else {
-                         names(d.temp)[ names(d.temp) == "eventCategory" ] = "type"
-                       }
-                       
-                       return(d.temp)
+                       d.temp = fetch_one_platform( metric = metric, 
+                                                    start.date = start.date,
+                                                    end.date = end.date,
+                                                    platform = platforms[x],
+                                                    id = ids[x] )
                      }
-  )
+                    )
+  
   library(data.table)
   d = rbindlist(datalist)
   
+  # subset to specified region if needed
   if (! is.na(region) ) {
     # doesn't work for mysterious reasons
    # d = d[ tolower(d$region) == region, ]
     
     ind = tolower(d$region) == region
     d = d[ind,]
-
   }
   
   return(d)
 }
+
+
+fetch_one_platform = function( metric,
+                              start.date,
+                              end.date,
+                              platform,
+                              id ) {
+  
+  #browser()
+  
+  # ifelse thing is per Dashboard > Report Configuration
+  if (platform == "android") {
+    event.dim = "eventAction"
+  } else {
+    event.dim = "eventCategory"
+  }
+  
+  d.temp = google_analytics( id, 
+                    date_range = c( format(start.date), format(end.date) ),
+                    metrics = c(metric),
+                    dimensions = c( "date",
+                                    event.dim,
+                                    "region",
+                                    "longitude",
+                                    "latitude",
+                                    "country"),
+                    max = -1 )  # -1 means to return all rows
+  
+  # merge info on which platform and ID we pulled
+  d.temp$viewID = id
+  d.temp$platform = platform
+  d.temp$month = month(d.temp$date)
+  
+  # to allow happy merging
+  if (platform == "android") {
+    names(d.temp)[ names(d.temp) == "eventAction" ] = "type" 
+  } else {
+    names(d.temp)[ names(d.temp) == "eventCategory" ] = "type"
+  }
+  
+  return(d.temp)
+}
+
+
 
 # ellipsis issue
 # https://stackoverflow.com/questions/3057341/how-to-use-rs-ellipsis-feature-when-writing-your-own-function
@@ -172,7 +205,7 @@ chloropleth = function( .type,
                         .start.date,
                         .end.date,
                         .data ) {
-
+  
   # reshape to have 1 row per state
   d2 = .data[ .data$type == .type & .data$platform %in% .platforms, ] %>%
     filter( country == "United States") %>%

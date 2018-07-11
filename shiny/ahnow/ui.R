@@ -18,6 +18,14 @@ navbarPage( "AHNow statistics", id = "navbar",
                                   start = "2017-1-1",
                                   end = "2017-12-31",
                                   format = "yyyy-mm-dd"),
+                        
+                        # https://stackoverflow.com/questions/40392676/r-shiny-date-slider-animation-by-month-currently-by-day/40402610
+                        sliderInput("Month", "Time animation:",
+                                    min=1,
+                                    max=12,
+                                    value=1,
+                                    animate=TRUE ),
+                      
 
                         selectInput( "type",
                                      label = "Event type",
@@ -52,6 +60,11 @@ navbarPage( "AHNow statistics", id = "navbar",
 
                         h3("Heat map"),
                         withSpinner( plotlyOutput("mapPlot", width="750px", height="500px") ),
+                        
+                        # BOOKMARK: ADD THE NEW ANIMATED MAP HERE
+                        h4("Animated map"),
+                        htmlOutput("aniMap"),
+                    
 
                         h3("Line plot"),
                         withSpinner( plotlyOutput("linePlot") )
@@ -81,8 +94,7 @@ navbarPage( "AHNow statistics", id = "navbar",
                                        ) ) ),
                         
                         sidebarPanel(
-                          h4("Data slice #1"),
-                          
+                          h4("Data slice A"),
                           
                           dateRangeInput(inputId = "dateRange2A",
                                          label = "Date range",
@@ -96,7 +108,6 @@ navbarPage( "AHNow statistics", id = "navbar",
                                                "Mobile web" = "mweb",
                                                "Regular website" = "web"),
                                              selected = c("iPhone", "android", "mweb", "web") ),
-                          # BOOKMARK
                           selectInput( "region2A",
                                        label = "Region",
                                        choices = c( tolower(state.name) )
@@ -105,13 +116,29 @@ navbarPage( "AHNow statistics", id = "navbar",
                         ),
                         
                         sidebarPanel( 
-                          h4("Data slice #2")
+                          h4("Data slice B"),
+                          
+                          dateRangeInput(inputId = "dateRange2B",
+                                         label = "Date range",
+                                         start = "2017-1-1",
+                                         end = "2017-12-31",
+                                         format = "yyyy-mm-dd"),
+                          
+                          checkboxGroupInput("platforms2B", "Platforms",
+                                             c("iPhone" = "iPhone",
+                                               "Android" = "android",
+                                               "Mobile web" = "mweb",
+                                               "Regular website" = "web"),
+                                             selected = c("iPhone", "android", "mweb", "web") ),
+                          selectInput( "region2B",
+                                       label = "Region",
+                                       choices = c( tolower(state.name) )
+                          )
                           ),
                       
                         mainPanel(
                           h4("Output"),
-                          span( textOutput("fake") )
-                          #withSpinner( tableOutput("comparison") )
+                          withSpinner( tableOutput("comparison") )
                         )
                   ) # end tabPanel
                     

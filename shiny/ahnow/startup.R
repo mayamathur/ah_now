@@ -9,6 +9,7 @@ library(fiftystater)
 library(ggplot2)
 library(mapproj)
 library(shinycssloaders)  # for loading spinners
+library(googleVis)
 
 # https://github.com/MarkEdmondson1234/googleAnalyticsR/issues/126
 ga_auth(".httr-oauth")

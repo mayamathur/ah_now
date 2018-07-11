@@ -5,37 +5,44 @@ function(input, output, session) {
     reactiveData <- reactive({
       if(input$password == "osprey") {
         
-        # ~~~ NOT USING API
-        get_data(metric = input$metric,
+        browser()
+        
+        # subset to chosen platforms
+        get_data( metric = input$metric,
                  start.date = format( input$dateRange[1] ),
-                 end.date = format( input$dateRange[2] ) )
+                 end.date = format( input$dateRange[2] ),
+                 .platforms = input$plotPlatforms )
       } else {
         stop("Password is incorrect")
       }
     })
     
     reactiveDataSliceA <- reactive({
-     # if(input$password == "osprey") {
-      # get_data( metric = "sessions",
-      #           start.date = "2017-01-01",
-      #           end.date = "2017-12-31" )
-      
-      # # WORKS
-      #   d = get_data_no_API( metric = input$metric2,
-      #            start.date = format( input$dateRange2A[1] ),
-      #            end.date = format( input$dateRange2A[2] ),
-      #            region = input$region2A )
-        
-      # DOES NOT WORK
+
         d = get_data( metric = input$metric2,
                              start.date = format( input$dateRange2A[1] ),
                              end.date = format( input$dateRange2A[2] ),
-                             region = input$region2A )
+                             region = input$region2A,
+                            .platforms = input$platforms2A )
         
         return(d)
     #  } else {
     #    stop("Password is incorrect")
     #  }
+    })
+    
+    reactiveDataSliceB <- reactive({
+      
+      d = get_data( metric = input$metric2,
+                    start.date = format( input$dateRange2B[1] ),
+                    end.date = format( input$dateRange2B[2] ),
+                    region = input$region2B,
+                    .platforms = input$platforms2B )
+      
+      return(d)
+      #  } else {
+      #    stop("Password is incorrect")
+      #  }
     })
     
 
@@ -47,6 +54,7 @@ function(input, output, session) {
 
     }, digits=0)
 
+    
     output$grand.total = renderText({
 
       d = reactiveData()
@@ -59,7 +67,6 @@ function(input, output, session) {
 
     output$mapPlot = renderPlotly({
       d = reactiveData()
-
       ggplotly(
         chloropleth( .type = input$type,
                      .metric = input$metric,
@@ -70,6 +77,22 @@ function(input, output, session) {
       )
 
     })
+    
+    # BOOKMARK
+    # animated map
+    # Example 3 of: https://magesblog.com/post/2013-02-26-first-steps-of-using-googlevis-on-shiny/
+    output$aniMap = renderGvis({
+      d = reactiveData()
+       temp = d[ d$type == input$type, ]
+       
+       #browser()
+
+      gvisGeoChart( temp,
+                    locationvar = "latitude:longitude",
+                      colorvar = input$metric )
+
+    })
+    
 
     output$linePlot = renderPlotly({
       d = reactiveData()
@@ -88,43 +111,27 @@ function(input, output, session) {
 
 
 
-    output$fake = renderText({
+    output$comparison = renderTable({
+      
+      #browser()
 
-      d = reactiveDataSliceA()
+      a = reactiveDataSliceA()
+      b = reactiveDataSliceB()
 
-      stats = summary_stats( .type = "PhoneDialed", .metric = "sessions", .data = d )
+      statsA = summary_stats( .type = input$type2, .metric = input$metric2, .data = a )
+      statsB = summary_stats( .type = input$type2, .metric = input$metric2, .data = b )
+      
+      return( data.frame( "Data slice" = c("A", "B", "Difference B-A"),
+                          "Total" = c(statsA$grand.tot, statsB$grand.tot, statsB$grand.tot - statsA$grand.tot) ) )
+    
 
-        return( paste( "Total ", "sessions", " for ", "PhoneDialed", ": ", stats$grand.tot, sep="" ) )
+        # return( paste( "Total ", input$metric2, " for ", input$type2, " for slice A: ", statsA$grand.tot,
+        #                "\nTotal ", input$metric2, " for ", input$type2, " for slice B: ", statsB$grand.tot, 
+        #                sep="" ) )
+      
+      
 
-    })
-
-
-    # output$comparison = renderTable({
-    #   # BOOKMARK: NOT WORKING!!!
-    # 
-    #   d = reactiveDataSliceA()
-    #   #d = reactiveData()
-    # 
-    #   # # counts for first slice
-    #   # summaryA = d %>%
-    #   #                 #filter( type == input$type2) %>%
-    #   #                 #filter( platform %in% input$platforms2A ) %>%
-    #   #                 filter( region %in% input$region2A ) %>%
-    #   #                 #filter( date >= input$dateRange2A[1] & date <= input$dateRange2A[2] ) %>%
-    #   #                 summarise( total = sum( !!sym(input$metric2) ) )
-    # 
-    #   #totalA = summaryA$total
-    # 
-    #   #browser()
-    # 
-    #   d = d[ d$region == input$region2A, ]
-    # 
-    #   #return( as.character( input$region2A) ) # works
-    #   #return( as.character( dim(d) ) ) # also works
-    #   return( as.character( dim(d) ) ) # works
-    #   #return(summaryA)
-    #   #return( as.character(totalA) )
-    # })
+    }, digits = 0)
 
 }
 
