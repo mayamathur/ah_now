@@ -151,16 +151,11 @@ navbarPage( "AHNow statistics", id = "navbar",
                         )
                   ), # end tabPanel
             
-            # BOOKMARK
             tabPanel( "Helpers",
                       
                       mainPanel( 
-                        h3("Animated map"),
-                        HTML( paste('Enter your parameters in the "Basics" tab.
-                                    <br>Choose a date range spanning a full calendar year (01-01 to 12-31).
-                                    <br>To play animation, press the blue triangle under the slider.
-                                    <br><br>Each map at a given month represents aggregated events for that month. When multiple events occurred close to one another, they are aggregated into a single point that is larger and displayed in a darker color (see legend).
-                                    <br>Hover over a point or circle for more information.') ),
+                        h3("Distribution of U.S. helpers"),
+                        HTML( paste('Hover over a point for more information.') ),
                         withSpinner( plotlyOutput("helperMap") )
                         )
                       )

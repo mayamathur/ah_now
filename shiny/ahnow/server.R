@@ -125,13 +125,18 @@ function(input, output, session) {
       f = f %>% filter( Latitude >= bottom & Latitude <= top ) %>%
         filter( Longitude >= left & Longitude <= right )
       
+      # for hovering over points
+      f$string = paste( f$Name_Pub, " (", f$HelperType_Pub, ")", sep="" )
+      
       #browser()
       
       states = map_data("state")
       
       p = ggplot(data = states) + 
         geom_polygon(aes(x = long, y = lat, group = group), color = "black", fill="white") + 
-        geom_point( data = f, aes( x = Longitude, y = Latitude ), color = "red", alpha = 0.4, size = 1 ) +
+        
+        # in the below, "text" argument is what shows up on point hover
+        geom_point( data = f, aes( x = Longitude, y = Latitude, text=string ), color = "red", alpha = 0.4, size = 1 ) +
         coord_fixed(1.3) +
         guides(fill=FALSE) +
         theme_classic() +
