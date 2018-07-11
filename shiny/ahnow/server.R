@@ -101,9 +101,48 @@ function(input, output, session) {
       gvisGeoChart( temp,
                     locationvar = "latlon",
                     colorvar = input$metric,
-                    options = list( region = "US") )
+                    options = list( region = "US"
+                                     )
+                    )
 
     })
+    
+    
+    output$helperMap = renderPlotly({
+      
+      # use static helper data
+      # remove missing data
+      f = f[ !is.na(f$Latitude) & !is.na(f$Longitude), ]
+      f$Latitude = as.numeric( as.character(f$Latitude) )
+      f$Longitude = as.numeric( as.character(f$Longitude) )
+      
+      # bounding box around continental US
+      top = 49.3457868 # north lat
+      left = -124.7844079 # west long
+      right = -66.9513812 # east long
+      bottom =  24.7433195 # south lat
+      
+      f = f %>% filter( Latitude >= bottom & Latitude <= top ) %>%
+        filter( Longitude >= left & Longitude <= right )
+      
+      #browser()
+      
+      states = map_data("state")
+      
+      p = ggplot(data = states) + 
+        geom_polygon(aes(x = long, y = lat, group = group), color = "black", fill="white") + 
+        geom_point( data = f, aes( x = Longitude, y = Latitude ), color = "red", alpha = 0.4, size = 1 ) +
+        coord_fixed(1.3) +
+        guides(fill=FALSE) +
+        theme_classic() +
+        xlab("Longitude") +
+        ylab("Latitude")
+      
+      ggplotly(p)
+      
+    })
+    
+    
     
 
     output$linePlot = renderPlotly({

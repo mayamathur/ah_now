@@ -3,6 +3,14 @@
 #  make password work
 #  have checkboxes to include only certain platforms in heat map and line plot
 
+
+# make list of types (metrics)
+# setwd("~/Dropbox/Personal computer/Independent studies/Animal Help Now/Analyses/ah_now_git/shiny/ahnow")
+# d = read.csv("2018-07-03_session_data.csv")
+# types = as.character( sort( unique(d$type) ) )
+# types = collapse( types, ",")
+# write.csv(types, "list_of_types.csv")
+
 ############################### FN: SUMMARIZE EVENTS ############################### 
 
 # to display the df in Shiny: 

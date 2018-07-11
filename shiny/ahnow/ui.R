@@ -19,14 +19,12 @@ navbarPage( "AHNow statistics", id = "navbar",
                                   end = "2017-12-31",
                                   format = "yyyy-mm-dd"),
                         
-
+                        # see startup.R for where we read in the types
+                        # original script for creating types is in functions.R
                         selectInput( "type",
                                      label = "Event type",
-                                     choices = c( "Phone dialed" = "PhoneDialed",
-                                                  "Animal type filter" = "AnimalTypeFilter",
-                                                  "Case flow" = "CaseFlow",
-                                                  "Helper detail displayed" = "HelperDetail_Displayed"
-                                                   ) ),
+                                     choices = types ),
+                        
 
                         selectInput( "metric",
                                      label = "Metric to analyze",
@@ -80,78 +78,92 @@ navbarPage( "AHNow statistics", id = "navbar",
                         h3("Animated map"),
                         HTML( paste('Enter your parameters in the "Basics" tab.
                                     <br>Choose a date range spanning a full calendar year (01-01 to 12-31).
-                                    <br>To play animation, press the blue triangle under the slider.') ),
+                                    <br>To play animation, press the blue triangle under the slider.
+                                    <br><br>Each map at a given month represents aggregated events for that month. When multiple events occurred close to one another, they are aggregated into a single point that is larger and displayed in a darker color (see legend).
+                                    <br>Hover over a point or circle for more information.') ),
                         htmlOutput("aniMap")
                       )
-            ) # end tabPanel       
+            ), # end tabPanel       
             
-            # WORK IN PROGRESS
-              # tabPanel( "Compare",
-              #           
-              #           sidebarPanel( 
-              #             h4("Compare with respect to:"),
-              #             selectInput( "type2",
-              #                          label = "Event type",
-              #                          choices = c( "Phone dialed" = "PhoneDialed",
-              #                                       "Animal type filter" = "AnimalTypeFilter",
-              #                                       "Case flow" = "CaseFlow",
-              #                                       "Helper detail displayed" = "HelperDetail_Displayed"
-              #                          ) ),
-              #             
-              #             selectInput( "metric2",
-              #                          label = "Metric to analyze",
-              #                          choices = c( "Sessions" = "sessions"
-              #                                       # "Users" = "users"
-              #                          ) ) ),
-              #           
-              #           sidebarPanel(
-              #             h4("Data slice A"),
-              #             
-              #             dateRangeInput(inputId = "dateRange2A",
-              #                            label = "Date range",
-              #                            start = "2017-1-1",
-              #                            end = "2017-12-31",
-              #                            format = "yyyy-mm-dd"),
-              #             
-              #             checkboxGroupInput("platforms2A", "Platforms",
-              #                                c("iPhone" = "iPhone",
-              #                                  "Android" = "android",
-              #                                  "Mobile web" = "mweb",
-              #                                  "Regular website" = "web"),
-              #                                selected = c("iPhone", "android", "mweb", "web") ),
-              #             selectInput( "region2A",
-              #                          label = "Region",
-              #                          choices = c( tolower(state.name) )
-              #                          )
-              # 
-              #           ),
-              #           
-              #           sidebarPanel( 
-              #             h4("Data slice B"),
-              #             
-              #             dateRangeInput(inputId = "dateRange2B",
-              #                            label = "Date range",
-              #                            start = "2017-1-1",
-              #                            end = "2017-12-31",
-              #                            format = "yyyy-mm-dd"),
-              #             
-              #             checkboxGroupInput("platforms2B", "Platforms",
-              #                                c("iPhone" = "iPhone",
-              #                                  "Android" = "android",
-              #                                  "Mobile web" = "mweb",
-              #                                  "Regular website" = "web"),
-              #                                selected = c("iPhone", "android", "mweb", "web") ),
-              #             selectInput( "region2B",
-              #                          label = "Region",
-              #                          choices = c( tolower(state.name) )
-              #             )
-              #             ),
-              #         
-              #           mainPanel(
-              #             h4("Output"),
-              #             withSpinner( tableOutput("comparison") )
-              #           )
-              #     ) # end tabPanel
+            
+              tabPanel( "Compare",
+
+                        sidebarPanel(
+                          h4("Compare with respect to:"),
+                          selectInput( "type2",
+                                       label = "Event type",
+                                       choices = types ),
+
+                          selectInput( "metric2",
+                                       label = "Metric to analyze",
+                                       choices = c( "Sessions" = "sessions",
+                                                    "Users" = "users",
+                                                    "New users" = "newUsers",
+                                                    "Bounces" = "bounces"
+                                       ) ) ),
+
+                        sidebarPanel(
+                          h4("Data slice A"),
+
+                          dateRangeInput(inputId = "dateRange2A",
+                                         label = "Date range",
+                                         start = "2017-1-1",
+                                         end = "2017-12-31",
+                                         format = "yyyy-mm-dd"),
+
+                          checkboxGroupInput("platforms2A", "Platforms",
+                                             c("iPhone" = "iPhone",
+                                               "Android" = "android",
+                                               "Mobile web" = "mweb",
+                                               "Regular website" = "web"),
+                                             selected = c("iPhone", "android", "mweb", "web") ),
+                          selectInput( "region2A",
+                                       label = "Region",
+                                       choices = c( tolower(state.name) )
+                                       )
+
+                        ),
+
+                        sidebarPanel(
+                          h4("Data slice B"),
+
+                          dateRangeInput(inputId = "dateRange2B",
+                                         label = "Date range",
+                                         start = "2017-1-1",
+                                         end = "2017-12-31",
+                                         format = "yyyy-mm-dd"),
+
+                          checkboxGroupInput("platforms2B", "Platforms",
+                                             c("iPhone" = "iPhone",
+                                               "Android" = "android",
+                                               "Mobile web" = "mweb",
+                                               "Regular website" = "web"),
+                                             selected = c("iPhone", "android", "mweb", "web") ),
+                          selectInput( "region2B",
+                                       label = "Region",
+                                       choices = c( tolower(state.name) )
+                          )
+                          ),
+
+                        mainPanel(
+                          h4("Output"),
+                          withSpinner( tableOutput("comparison") )
+                        )
+                  ), # end tabPanel
+            
+            # BOOKMARK
+            tabPanel( "Helpers",
+                      
+                      mainPanel( 
+                        h3("Animated map"),
+                        HTML( paste('Enter your parameters in the "Basics" tab.
+                                    <br>Choose a date range spanning a full calendar year (01-01 to 12-31).
+                                    <br>To play animation, press the blue triangle under the slider.
+                                    <br><br>Each map at a given month represents aggregated events for that month. When multiple events occurred close to one another, they are aggregated into a single point that is larger and displayed in a darker color (see legend).
+                                    <br>Hover over a point or circle for more information.') ),
+                        withSpinner( plotlyOutput("helperMap") )
+                        )
+                      )
             
 )
 
