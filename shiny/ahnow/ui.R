@@ -30,8 +30,10 @@ navbarPage( "AHNow statistics", id = "navbar",
 
                         selectInput( "metric",
                                      label = "Metric to analyze",
-                                     choices = c( "Sessions" = "sessions"
-                                                 # "Users" = "users"
+                                     choices = c( "Sessions" = "sessions",
+                                                  "Users" = "users",
+                                                 "New users" = "newUsers",
+                                                 "Bounces" = "bounces"
                                      ) ),
 
                         checkboxGroupInput("plotPlatforms", "Platforms to show in plot:",
