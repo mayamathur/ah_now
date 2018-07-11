@@ -19,13 +19,6 @@ navbarPage( "AHNow statistics", id = "navbar",
                                   end = "2017-12-31",
                                   format = "yyyy-mm-dd"),
                         
-                        # https://stackoverflow.com/questions/40392676/r-shiny-date-slider-animation-by-month-currently-by-day/40402610
-                        sliderInput("Month", "Time animation:",
-                                    min=1,
-                                    max=12,
-                                    value=1,
-                                    animate=TRUE ),
-                      
 
                         selectInput( "type",
                                      label = "Event type",
@@ -61,11 +54,6 @@ navbarPage( "AHNow statistics", id = "navbar",
                         h3("Heat map"),
                         withSpinner( plotlyOutput("mapPlot", width="750px", height="500px") ),
                         
-                        # BOOKMARK: ADD THE NEW ANIMATED MAP HERE
-                        h4("Animated map"),
-                        htmlOutput("aniMap"),
-                    
-
                         h3("Line plot"),
                         withSpinner( plotlyOutput("linePlot") )
                       ) # end mainPanel
@@ -140,7 +128,26 @@ navbarPage( "AHNow statistics", id = "navbar",
                           h4("Output"),
                           withSpinner( tableOutput("comparison") )
                         )
-                  ) # end tabPanel
+                  ), # end tabPanel
+            
+            
+            tabPanel( "Animated map",
+                      
+                      sidebarPanel(
+                        # https://stackoverflow.com/questions/40392676/r-shiny-date-slider-animation-by-month-currently-by-day/40402610
+                        sliderInput("Month", "Time animation:",
+                                    min=1,
+                                    max=12,
+                                    value=1,
+                                    animate=TRUE )
+  
+                      ),
+                      
+                      mainPanel( 
+                        h4("Animated map"),
+                        htmlOutput("aniMap")
+                      )
+            ) # end tabPanel
                     
             
 )

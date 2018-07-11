@@ -79,12 +79,16 @@ function(input, output, session) {
     # BOOKMARK
     # animated map
     # Example 3 of: https://magesblog.com/post/2013-02-26-first-steps-of-using-googlevis-on-shiny/
+    myMonth <- reactive({
+      input$Month
+    })
+    
+    # TEMP ONLY: NEED TO CHANGE BECAUSE INPUT MIGHT HAVE REPEATED MONTHS
     output$aniMap = renderGvis({
       
       d = reactiveData()
-       temp = d[ d$type == input$type, ]
+       temp = d[ d$type == input$type & d$month == myMonth(), ]
       
-       
        temp$latlon = paste( temp$latitude, ":", temp$longitude, sep="" )
 
       gvisGeoChart( temp,
