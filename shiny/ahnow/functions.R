@@ -85,7 +85,6 @@ get_data = function( metric = "sessions",
                      region = NA,
                      .platforms = c("iPhone", "android", "mweb", "web") ){
 
-
   # make id-platform key
   # from viewID in: ga_account_list()
   ids = c(75070560, 66336346, 75085662, 66319754)
@@ -129,8 +128,6 @@ fetch_one_platform = function( metric,
                               platform,
                               id ) {
   
-  #browser()
-  
   # ifelse thing is per Dashboard > Report Configuration
   if (platform == "android") {
     event.dim = "eventAction"
@@ -148,6 +145,8 @@ fetch_one_platform = function( metric,
                                     "latitude",
                                     "country"),
                     max = -1 )  # -1 means to return all rows
+  
+  if( is.null(d.temp) ) stop("No data available for those choices of parameters.")
   
   # merge info on which platform and ID we pulled
   d.temp$viewID = id

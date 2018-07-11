@@ -17,8 +17,9 @@ ga_auth(".httr-oauth")
 # keeps original error messages
 options(shiny.sanitize.errors = FALSE)
 
+
 # download static data
 # only needed if avoiding API data
 # all data
-da = read.csv("2018-07-03_session_data.csv")
+#da = read.csv("2018-07-03_session_data.csv")
 

@@ -4,7 +4,7 @@ function(input, output, session) {
   
     reactiveData <- reactive({
       if(input$password == "osprey") {
-        
+
         # subset to chosen platforms
         get_data( metric = input$metric,
                  start.date = format( input$dateRange[1] ),
@@ -79,21 +79,29 @@ function(input, output, session) {
     # BOOKMARK
     # animated map
     # Example 3 of: https://magesblog.com/post/2013-02-26-first-steps-of-using-googlevis-on-shiny/
-    myMonth <- reactive({
+    aniMonth <- reactive({
       input$Month
     })
     
-    # TEMP ONLY: NEED TO CHANGE BECAUSE INPUT MIGHT HAVE REPEATED MONTHS
+    
     output$aniMap = renderGvis({
       
+      # check that user specified a full calendar year
+      # allow for both normal years (364) and leap years (365)
+      date.span = as.numeric(as.Date(input$dateRange[2]) - as.Date(input$dateRange[1]) )
+      if ( !date.span %in% c(364, 365) ) {
+        stop( 'On the "Basics" tab, must enter a full calendar year from 01-01 to 12-31 to see animated map.')
+      }
+      
       d = reactiveData()
-       temp = d[ d$type == input$type & d$month == myMonth(), ]
+       temp = d[ d$type == input$type & d$month == aniMonth(), ]
       
        temp$latlon = paste( temp$latitude, ":", temp$longitude, sep="" )
 
       gvisGeoChart( temp,
                     locationvar = "latlon",
-                      colorvar = input$metric )
+                    colorvar = input$metric,
+                    options = list( region = "US") )
 
     })
     
@@ -116,8 +124,6 @@ function(input, output, session) {
 
 
     output$comparison = renderTable({
-      
-      #browser()
 
       a = reactiveDataSliceA()
       b = reactiveDataSliceB()
