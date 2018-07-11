@@ -156,7 +156,7 @@ navbarPage( "AHNow statistics", id = "navbar",
                       mainPanel( 
                         h3("Distribution of U.S. helpers"),
                         HTML( paste('Hover over a point for more information.') ),
-                        withSpinner( plotlyOutput("helperMap") )
+                        withSpinner( plotlyOutput("helperMap", width="750px", height="500px") )
                         )
                       )
             

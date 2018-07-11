@@ -5,8 +5,8 @@ account: mmathur
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 367270
-bundleId: 1475426
+bundleId: 1475542
 url: https://mmathur.shinyapps.io/ahnow/
-when: 1531325053.79133
+when: 1531329138.11113
 asMultiple: FALSE
 asStatic: FALSE
