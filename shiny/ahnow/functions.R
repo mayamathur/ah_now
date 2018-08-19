@@ -205,12 +205,15 @@ fetch_one_platform = function( metric,
 ############################### FN: MAKE CHLOROPLETH ###############################
 
 # .type can be a vector to consider events in multiple categories
+# .title: title for plot
+
 chloropleth = function( .type,
                         .metric,
                         .platforms = c("iPhone", "web", "android", "mweb"),
                         .start.date,
                         .end.date,
-                        .data ) {
+                        .data,
+                        .title = NA ) {
   
   # reshape to have 1 row per state
   d2 = .data[ .data$type %in% .type & .data$platform %in% .platforms, ] %>%
@@ -234,15 +237,35 @@ chloropleth = function( .type,
 
 
   library("RColorBrewer")
-  myPalette <- colorRampPalette(brewer.pal(50, "YlOrBr"))
-  sc <- scale_fill_gradientn(colours = myPalette(100), limits=c(0, max(d4$total, na.rm=TRUE)))
+  myPalette = colorRampPalette(brewer.pal(9, "YlOrBr"))
+  #sc = scale_fill_gradientn(colours = myPalette(100), limits=c(0, max(d4$total, na.rm=TRUE)))
 
-  title = paste( "Total ", .metric, " of ",
-                 paste( .type, collapse=" + "), # collapse to handle when .type has length > 1
-                 ", ",
-                 .start.date, " to ",
-                 .end.date, sep="" )
-
+  
+  if ( is.na(.title) ) {
+    title = paste( "Total ", .metric, " of ",
+                   paste( .type, collapse=" + "), # collapse to handle when .type has length > 1
+                   ", ",
+                   .start.date, " to ",
+                   .end.date, sep="" )
+  } else {
+    title = .title
+  }
+  
+  
+  # calculate breaks for legend
+  # even jumps from 0 to max number displayed in plot
+  max = max(d4$total)
+  breaks = seq( 0, max, length.out = 5 )
+  # round to nearest 100, 10, or 1 depending on how big the numbers are
+  if ( max > 1000 ) {
+    breaks = round( breaks / 100 ) * 100
+  } else if ( max > 100 ) {
+    breaks = round( breaks / 10 ) * 10
+  } else {
+      breaks = round( breaks )
+  }
+  
+  
   # map_id creates the aesthetic mapping to the state name column in your data
   p <- ggplot(d4, aes(map_id = region)) +
     # map points to the fifty_states shape data
@@ -250,7 +273,8 @@ chloropleth = function( .type,
     expand_limits(x = fifty_states$long, y = fifty_states$lat) +
     coord_map() +
     scale_fill_gradientn( colours = myPalette(100),
-                          limits=c(0, max(d4$total) ),
+                          limits=c(0, max ),
+                          breaks = breaks,
                           na.value = "lightgray" ) +
     scale_x_continuous(breaks = NULL) +
     scale_y_continuous(breaks = NULL) +
@@ -274,24 +298,17 @@ chloropleth = function( .type,
 }
 
 
-d = get_data(metric = "sessions",
-                           start.date = "2017-01-01",
-                           end.date = "2017-12-01"  )
+# d = get_data(metric = "sessions",
+#                            start.date = "2017-01-01",
+#                            end.date = "2017-12-01"  )
+# 
+# chloropleth( .type = c( "HelperDetail_Displayed", "Resources" ),
+#                         .metric = "sessions",
+#                         .platforms = c("iPhone", "web", "android", "mweb"),
+#                         .start.date = "2017-01-01",
+#                         .end.date = "2017-12-31",
+#                         .data=d )
 
-chloropleth( .type = c( "HelperDetail_Displayed", "Resources" ),
-                        .metric = "sessions",
-                        .platforms = c("iPhone", "web", "android", "mweb"),
-                        .start.date = "2017-01-01",
-                        .end.date = "2017-12-31",
-                        .data=d )
-
-
-chloropleth( .type = c( "Resources" ),
-             .metric = "sessions",
-             .platforms = c("iPhone", "web", "android", "mweb"),
-             .start.date = "2017-01-01",
-             .end.date = "2017-12-31",
-             .data=d )
 
 
 ############################### FN: MAKE LINE PLOT OF EVENTS OVER TIME ###############################
