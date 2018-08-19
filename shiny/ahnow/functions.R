@@ -204,8 +204,7 @@ fetch_one_platform = function( metric,
 
 ############################### FN: MAKE CHLOROPLETH ###############################
 
-
-# make the plots interactive as in Corinne's code
+# .type can be a vector to consider events in multiple categories
 chloropleth = function( .type,
                         .metric,
                         .platforms = c("iPhone", "web", "android", "mweb"),
@@ -214,7 +213,7 @@ chloropleth = function( .type,
                         .data ) {
   
   # reshape to have 1 row per state
-  d2 = .data[ .data$type == .type & .data$platform %in% .platforms, ] %>%
+  d2 = .data[ .data$type %in% .type & .data$platform %in% .platforms, ] %>%
     filter( country == "United States") %>%
     group_by(region) %>%
     summarise( total = sum( !!sym(.metric) ) )
@@ -238,7 +237,11 @@ chloropleth = function( .type,
   myPalette <- colorRampPalette(brewer.pal(50, "YlOrBr"))
   sc <- scale_fill_gradientn(colours = myPalette(100), limits=c(0, max(d4$total, na.rm=TRUE)))
 
-  title = paste( "Total ", .metric, " of ", .type, ", ", .start.date, " to ", .end.date, sep="" )
+  title = paste( "Total ", .metric, " of ",
+                 paste( .type, collapse=" + "), # collapse to handle when .type has length > 1
+                 ", ",
+                 .start.date, " to ",
+                 .end.date, sep="" )
 
   # map_id creates the aesthetic mapping to the state name column in your data
   p <- ggplot(d4, aes(map_id = region)) +
@@ -271,12 +274,24 @@ chloropleth = function( .type,
 }
 
 
-# chloropleth( .type = "PhoneDialed",
-#                         .metric = "sessions",
-#                         .platforms = c("iPhone", "web", "android", "mweb"),
-#                         .start.date = "2017-01-01",
-#                         .end.date = "2017-12-31",
-#                         .data=d )
+d = get_data(metric = "sessions",
+                           start.date = "2017-01-01",
+                           end.date = "2017-12-01"  )
+
+chloropleth( .type = c( "HelperDetail_Displayed", "Resources" ),
+                        .metric = "sessions",
+                        .platforms = c("iPhone", "web", "android", "mweb"),
+                        .start.date = "2017-01-01",
+                        .end.date = "2017-12-31",
+                        .data=d )
+
+
+chloropleth( .type = c( "Resources" ),
+             .metric = "sessions",
+             .platforms = c("iPhone", "web", "android", "mweb"),
+             .start.date = "2017-01-01",
+             .end.date = "2017-12-31",
+             .data=d )
 
 
 ############################### FN: MAKE LINE PLOT OF EVENTS OVER TIME ###############################
