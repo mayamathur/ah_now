@@ -240,7 +240,6 @@ chloropleth = function( .type,
   myPalette = colorRampPalette(brewer.pal(9, "YlOrBr"))
   #sc = scale_fill_gradientn(colours = myPalette(100), limits=c(0, max(d4$total, na.rm=TRUE)))
 
-  
   if ( is.na(.title) ) {
     title = paste( "Total ", .metric, " of ",
                    paste( .type, collapse=" + "), # collapse to handle when .type has length > 1
@@ -251,11 +250,12 @@ chloropleth = function( .type,
     title = .title
   }
   
-
+  
   # calculate breaks for legend
   # even jumps from 0 to max number displayed in plot
   max = max(d4$total, na.rm=TRUE)
   breaks = seq( 0, max, length.out = 5 )
+  
   # round to nearest 100, 10, or 1 depending on how big the numbers are
   if ( max > 1000 ) {
     breaks = round( breaks / 100 ) * 100
