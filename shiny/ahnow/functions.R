@@ -140,20 +140,6 @@ fetch_one_platform = function( metric,
                                paths = FALSE ) {
   
   
-  # # ~~~~ TESTING ONLY
-  # # make id-platform key
-  # # from viewID in: ga_account_list()
-  # ids = c(75070560, 66336346, 75085662, 66319754)
-  # platforms = c("iPhone", "web", "android", "mweb")
-  # metric = "sessions"
-  # start.date = "2018-01-01"
-  # end.date = "2018-08-20"
-  # platform = platforms[3]
-  # id = ids[3]
-  # paths = TRUE
-  
-  
-  
   ##### Non-Path Data #####
   # if not interested in path data, then just query the needed dimension
   #  based on platform
@@ -233,6 +219,7 @@ fetch_one_platform = function( metric,
       
       # for happy merging
       d.temp = d.temp[ , !names(d.temp) == "eventLabel" ]
+
     }
     
   }
