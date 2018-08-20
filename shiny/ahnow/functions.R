@@ -131,28 +131,105 @@ get_data = function( metric = "sessions",
 
 
 fetch_one_platform = function( metric,
-                              start.date,
-                              end.date,
-                              platform,
-                              id ) {
+                               start.date,
+                               end.date,
+                               platform,
+                               id,
+                               paths = FALSE ) {
   
-  # ifelse thing is per Dashboard > Report Configuration
-  if (platform == "android") {
-    event.dim = "eventAction"
-  } else {
-    event.dim = "eventCategory"
+  # # ~~~~ TESTING ONLY
+  # # make id-platform key
+  # # from viewID in: ga_account_list()
+  # ids = c(75070560, 66336346, 75085662, 66319754)
+  # platforms = c("iPhone", "web", "android", "mweb")
+  # metric = "sessions"
+  # start.date = "2018-01-01"
+  # end.date = "2018-08-20"
+  # platform = platforms[3]
+  # id = ids[3]
+  # paths = TRUE
+  
+  
+  
+  ##### Non-Path Data #####
+  # if not interested in path data, then just query the needed dimension
+  #  based on platform
+  if ( paths == FALSE ) {
+    # ifelse thing is per Dashboard > Report Configuration
+    if (platform == "android") {
+      event.dim = "eventAction"
+    } else {
+      event.dim = "eventCategory"
+    }
+    
+    d.temp = google_analytics( id, 
+                               date_range = c( format(start.date), format(end.date) ),
+                               metrics = c(metric),
+                               dimensions = c( "date",
+                                               event.dim,
+                                               "region",
+                                               "longitude",
+                                               "latitude",
+                                               "country"),
+                               max = -1 )  # -1 means to return all rows
+    
+    # to allow happy merging
+    if (platform == "android") {
+      names(d.temp)[ names(d.temp) == "eventAction" ] = "type" 
+    } else {
+      names(d.temp)[ names(d.temp) == "eventCategory" ] = "type"
+    }
   }
   
-  d.temp = google_analytics( id, 
-                    date_range = c( format(start.date), format(end.date) ),
-                    metrics = c(metric),
-                    dimensions = c( "date",
-                                    event.dim,
-                                    "region",
-                                    "longitude",
-                                    "latitude",
-                                    "country"),
-                    max = -1 )  # -1 means to return all rows
+  ##### Path Data #####
+  # if interested in paths data, then need both eventAction and eventCategory per
+  #  platform because of differences in data collection across platforms 
+  if ( paths == TRUE ) {
+    # get data for this platform
+    d.temp = google_analytics( id, 
+                               date_range = c( format(start.date), format(end.date) ),
+                               metrics = c(metric),
+                               dimensions = c( "date",
+                                               "eventAction",
+                                               "eventCategory",
+                                               "eventLabel",
+                                               "region",
+                                               "longitude",
+                                               "latitude",
+                                               "country"),
+                               max = -1 )  # -1 means to return all rows
+    
+    # to allow happy merging
+    if (platform == "android") {
+      # the CaseFlow codes corresponding to those recorded by other platforms are
+      #  buried in the eventLabels
+      keeper.codes = unique(d.temp$eventLabel)[ grep( "Case Flow", unique(d.temp$eventLabel) ) ]
+      
+      d.temp = d.temp[ d.temp$eventLabel %in% keeper.codes, ]
+      
+      # sync the variable names across platforms
+      names(d.temp)[ names(d.temp) == "eventLabel" ] = "caseflow_num"
+      
+      # sync the variable content across platforms
+      # Android has the number embedded in a string
+      library(stringr)
+      d.temp$caseflow_num = as.numeric( str_extract( d.temp$caseflow_num, "[[:digit:]]+" ) )
+      
+      # for happy merging
+      d.temp = d.temp[ , !names(d.temp) == "eventAction" ]
+      
+    } else {
+      # keep only CaseFlow information (the ones with paths)
+      d.temp = d.temp[ d.temp$eventCategory == "CaseFlow", ]
+      
+      # sync the variable names across platforms
+      names(d.temp)[ names(d.temp) == "eventAction" ] = "caseflow_num"
+      
+      # sync the variable content across platforms
+      d.temp$caseflow_num = as.numeric( d.temp$caseflow_num )
+    }
+    
+  }
   
   if( is.null(d.temp) ) stop("No data available for those choices of parameters.")
   
@@ -161,20 +238,9 @@ fetch_one_platform = function( metric,
   d.temp$platform = platform
   d.temp$month = month(d.temp$date)
   
-  # to allow happy merging
-  if (platform == "android") {
-    names(d.temp)[ names(d.temp) == "eventAction" ] = "type" 
-  } else {
-    names(d.temp)[ names(d.temp) == "eventCategory" ] = "type"
-  }
   
   return(d.temp)
 }
-
-
-
-# ellipsis issue
-# https://stackoverflow.com/questions/3057341/how-to-use-rs-ellipsis-feature-when-writing-your-own-function
 
 
 
