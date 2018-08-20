@@ -117,7 +117,8 @@ get_data = function( metric = "sessions",
                     )
   
   library(data.table)
-  d = rbindlist(datalist)
+  
+  d = rbindlist(datalist, use.names = TRUE)
   
   # subset to specified region if needed
   if (! is.na(region) ) {
