@@ -31,40 +31,25 @@ d = get_data(metric = "sessions",
              end.date = today(),
              paths = TRUE )
 
+d$type = d$caseflow_num
+
+table(d$caseflow_num)
+# ~~~ PROBLEM: RBINDLIST IS ADDING THE DECISIONNAVIGATION THING AGAIN
+
+# ~~~ CHECK THESE WITH DAVE
+# https://docs.google.com/spreadsheets/d/1-Zqk_HU_vIoLYeICdjtBDljCGrSt-9Tg_a53C2XrOsc/edit#gid=0
+wildlife.nums = c(12:15, 17, 18, 201, 202 )
+wildlife.emerg.nums = wildlife.nums[ !wildlife.nums == 202 ]
+wildlife.conflict.nums = 202
 
 
 ############################### MAKE MAPS ###############################
 
 ##### Map 1: helper details or resources #####
-chloropleth( .type = c( "HelperDetail_Displayed", "Resources" ),
+chloropleth( .type = c( 201 ),
              .metric = "sessions",
              .platforms = c("iPhone", "web", "android", "mweb"),
              .start.date = "2018-01-01",
              .end.date = today(),
              .data=d, 
              .title = "YTD sessions displaying helper details or resources" )
-
-setwd("~/Dropbox/Personal computer/Independent studies/Animal Help Now/Analyses/ah_now_git/for_dave/2018-8-19")
-width = 8
-# square.size = 8/3 # divide by number of cols
-# height = square.size*5  # multiply by number of rows
-ggsave( filename = "donor_map1.png",
-        path=NULL, width=width, units="in")
-
-
-##### Map 2: just resources #####
-
-chloropleth( .type = c( "Resources" ),
-             .metric = "sessions",
-             .platforms = c("iPhone", "web", "android", "mweb"),
-             .start.date = "2018-01-01",
-             .end.date = today(),
-             .data=d, 
-             .title = "YTD sessions displaying resources" )
-
-setwd("~/Dropbox/Personal computer/Independent studies/Animal Help Now/Analyses/ah_now_git/for_dave/2018-8-19")
-width = 8
-# square.size = 8/3 # divide by number of cols
-# height = square.size*5  # multiply by number of rows
-ggsave( filename = "donor_map2.png",
-        path=NULL, width=width, units="in")
