@@ -1,4 +1,91 @@
 
+
+############################### TRY TO GET WILDLIFE EMERGENCIES, ETC. ############################### 
+
+setwd("~/Dropbox/Personal computer/Independent studies/Animal Help Now/Analyses/ah_now_git/shiny/ahnow")
+source("functions.R")
+
+library(googleAnalyticsR)
+
+ids = c(75070560, 66336346, 75085662, 66319754)
+
+
+#start.date = "2016-01-01"
+start.date = "2018-01-01"
+end.date = "2018-08-19"
+
+# got segment info from: https://docs.google.com/spreadsheets/d/1YGx-eLl_yn4seYbbFmGg24etuAB9ltSDKeY9Av8iWeA/edit#gid=1684546460
+
+# ## choose the v3 segment
+# segment_for_call <- "gaid::3d0WmFriRf-O28_Q0nmCVg"
+# 
+# ## make the v3 segment object in the v4 segment object:
+# seg_obj <- segment_ga4("my_segment_wildlife", segment_id = segment_for_call)
+
+## make the segment call
+iPhone = google_analytics( ids[3],
+                          date_range = c(start.date, end.date),
+                          metrics = c("ga:sessions"),
+                          dimensions = c("ga:date",
+                                         "ga:eventAction",
+                                         "ga:eventCategory",
+                                         #"ga:eventLabel",
+                                         #"ga:pagePath",
+                                         #"ga:referralPath",
+                                         #"ga:pageTitle",
+                                         #"ga:userDefinedValue",
+                                         "ga:region",
+                                         "ga:country"),
+                          max = -1 )
+                          #segments = seg_obj )
+
+#unique(iPhone$eventLabel[ iPhone$eventCategory == "CaseFlow"])
+# BINGO
+
+unique(iPhone$eventAction[ iPhone$eventCategory == "CaseFlow"])
+
+
+# event actions corresponding to wildlife things
+unique( iPhone$eventAction[ iPhone$eventLabel %in% wildlife.labels ] )
+
+
+library(varhandle)
+unique(iPhone$eventAction)
+
+unique( iPhone$eventAction[ check.numeric(iPhone$eventAction) ] )
+
+
+# list the wildlife ones
+wildlife.labels = unique( iPhone$eventLabel[ grep("wildlife", iPhone$eventLabel) ])
+
+# filter to the ones with "wildlife" somewhere in the title
+temp = iPhone[ iPhone$eventCategory == "CaseFlow" &
+                 iPhone$eventLabel %in% wildlife.labels, ]
+
+
+# BOOKMARK: CHECK WHETHER IPHONE DATASET HAS EXPECTED NUMBER OF SESSIONS
+
+# 
+# and = google_analytics( ids[3],
+#                            date_range = c(start.date, end.date),
+#                            metrics = c("ga:sessions"),
+#                            dimensions = c("ga:date",
+#                                           "ga:eventAction",
+#                                           "ga:eventCategory",
+#                                           "ga:region",
+#                                           "ga:country") )
+
+
+unique(d$eventCategory)
+
+# THIS LISTS THE PATH NUMBER
+unique(iPhone$eventAction[ iPhone$eventCategory == "CaseFlow"])
+
+# Android
+unique(and$eventAction[ and$eventCategory == "DecisionNavigation"])
+
+
+
 ############################### HELPER FNS ############################### 
 # Next up: Shiny functions
 
