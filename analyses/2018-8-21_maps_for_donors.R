@@ -39,18 +39,26 @@ dp = get_data(metric = "sessions",
              end.date = today(),
              paths = TRUE )
 
+
+
 # rename to play well with chloropleth fn.
 dp$type = dp$caseflow_num
 
 table(dp$caseflow_num)
 
-# ~~~ CHECK THESE WITH DAVE
 # https://docs.google.com/spreadsheets/d/1-Zqk_HU_vIoLYeICdjtBDljCGrSt-9Tg_a53C2XrOsc/edit#gid=0
-all.nums = unique(d$caseflow_num)[ !is.na( unique(d$caseflow_num) ) ]
+all.nums = unique(dp$caseflow_num)[ !is.na( unique(dp$caseflow_num) ) ]
 wildlife.nums = c(12:15, 17, 18, 201, 202 )
 wildlife.emerg.nums = wildlife.nums[ !wildlife.nums == 202 ]
 wildlife.conflict.nums = 202
 
+
+# manual sanity check
+agg = dp %>% group_by(region) %>%
+  filter(caseflow_num %in% wildlife.emerg.nums ) %>%
+  filter(country == "United States" )  %>%
+summarise(total.sessions = sum(sessions, na.rm=TRUE))
+View(agg)
 
 ############################### MAKE MAPS ###############################
 
