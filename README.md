@@ -17,3 +17,5 @@ There are also important differences when analyzing path data. In the three non-
 
 They are trajectories that the user can take through the app (series of clicks). Note that the numbering of the paths changed in 2018 (see [this codebook of caseflow numbers](https://docs.google.com/spreadsheets/d/1-Zqk_HU_vIoLYeICdjtBDljCGrSt-9Tg_a53C2XrOsc/edit#gid=0)
 ). Paths allow detailed analyses, e.g., parsing users who query wildlife vs. domestic animal issues. See the above FAQ before analyzing path data. 
+
+Also, from Dave: "The helper list is accessed whenever a path is taken. So if we know how many times path 201 was taken, we know home many times the helper list was displayed for path 201."
