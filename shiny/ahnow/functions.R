@@ -266,6 +266,7 @@ fetch_one_platform = function( metric,
 
 # .type can be a vector to consider events in multiple categories
 # .title: title for plot
+# .legend.breaks: how many breaks for the color palette in the legend?
 
 chloropleth = function( .type,
                         .metric,
@@ -273,7 +274,8 @@ chloropleth = function( .type,
                         .start.date,
                         .end.date,
                         .data,
-                        .title = NA ) {
+                        .title = NA,
+                        .legend.breaks = 10) {
   
   # reshape to have 1 row per state
   d2 = .data[ .data$type %in% .type & .data$platform %in% .platforms, ] %>%
@@ -296,9 +298,9 @@ chloropleth = function( .type,
   d4$total[ is.na(d4$total) ] = NA
 
 
+  # 9 because this is the max (finest-grained) color palette
   library("RColorBrewer")
   myPalette = colorRampPalette(brewer.pal(9, "YlOrBr"))
-  #sc = scale_fill_gradientn(colours = myPalette(100), limits=c(0, max(d4$total, na.rm=TRUE)))
 
   if ( is.na(.title) ) {
     title = paste( "Total ", .metric, " of ",
@@ -314,7 +316,7 @@ chloropleth = function( .type,
   # calculate breaks for legend
   # even jumps from 0 to max number displayed in plot
   max = max(d4$total, na.rm=TRUE)
-  breaks = seq( 0, max, length.out = 5 )
+  breaks = seq( 0, max, length.out = .legend.breaks )
   
   # round to nearest 100, 10, or 1 depending on how big the numbers are
   if ( max > 1000 ) {
