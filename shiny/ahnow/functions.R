@@ -18,8 +18,12 @@
 
 # uses the full date range represented by the dataset
 
+# d = get_data(metric = "sessions",
+#                            start.date = "2019-01-01",
+#                            end.date = "2019-01-25",
+#              helpers = TRUE)
 summary_stats = function( .type, .metric = "sessions", .data ) {
-
+  
   # totals by platform
   # https://stackoverflow.com/questions/26724124/standard-evaluation-in-dplyr-summarise-on-variable-given-as-a-character-string
   platform.tot = as.data.frame( .data[ .data$type == .type, ] %>%
@@ -31,7 +35,7 @@ summary_stats = function( .type, .metric = "sessions", .data ) {
   grand.tot = as.numeric( .data[ .data$type == .type, ]  %>%
                             #filter( type == .type) %>%
                             summarise( total = sum( !!sym(.metric) ) ) )
-
+  
   
   return( list( grand.tot = grand.tot, 
                 platform.tot = platform.tot ) )
@@ -92,8 +96,9 @@ get_data = function( metric = "sessions",
                      end.date,
                      region = NA,
                      .platforms = c("iPhone", "android", "mweb", "web"),
-                     paths = FALSE ){
-
+                     paths = FALSE,
+                     helpers = FALSE){
+  
   # make id-platform key
   # from viewID in: ga_account_list()
   ids = c(75070560, 66336346, 75085662, 66319754)
@@ -112,9 +117,10 @@ get_data = function( metric = "sessions",
                                                     end.date = end.date,
                                                     platform = platforms[x],
                                                     id = ids[x],
-                                                    paths = paths )
+                                                    paths = paths,
+                                                    helpers = helpers)
                      }
-                    )
+  )
   
   library(data.table)
   
@@ -123,7 +129,7 @@ get_data = function( metric = "sessions",
   # subset to specified region if needed
   if (! is.na(region) ) {
     # doesn't work for mysterious reasons
-   # d = d[ tolower(d$region) == region, ]
+    # d = d[ tolower(d$region) == region, ]
     
     ind = tolower(d$region) == region
     d = d[ind,]
@@ -138,7 +144,8 @@ fetch_one_platform = function( metric,
                                end.date,
                                platform,
                                id,
-                               paths = FALSE ) {
+                               paths = FALSE,
+                               helpers = FALSE) {
   
   
   ##### Non-Path Data #####
@@ -146,6 +153,8 @@ fetch_one_platform = function( metric,
   #  based on platform
   if ( paths == FALSE ) {
     # ifelse thing is per Dashboard > Report Configuration
+    # If don't need to include information of how many times each individual helper's record is displayed
+    if (helpers == FALSE) {
     if (platform == "android") {
       event.dim = "eventAction"
     } else {
@@ -162,13 +171,54 @@ fetch_one_platform = function( metric,
                                                "latitude",
                                                "country"),
                                max = -1 )  # -1 means to return all rows
-    
     # to allow happy merging
     if (platform == "android") {
       names(d.temp)[ names(d.temp) == "eventAction" ] = "type" 
     } else {
       names(d.temp)[ names(d.temp) == "eventCategory" ] = "type"
     }
+    }
+    # If need to include information of how many times each individual helper's record is displayed
+    if (helpers == TRUE){
+          d.temp = google_analytics( id,
+                                     date_range = c( format(start.date), format(end.date) ),
+                                     metrics = c(metric),
+                                     dimensions = c( "date",
+                                                     "eventAction",
+                                                     "eventCategory",
+                                                     "eventLabel",
+                                                     "region",
+                                                     "longitude",
+                                                     "latitude",
+                                                     "country"),
+                                     max = -1 )  # -1 means to return all rows
+      # to allow happy merging
+      if (platform == "android") {
+        
+        # keep only information when event action is HelperDetail_Displayed
+        d.temp = d.temp[ d.temp$eventAction == "HelperDetail_Displayed", ]
+        # sync the variable names across platforms
+        names(d.temp)[ names(d.temp) == "eventLabel" ] = "helpers"
+        # for happy merging
+        d.temp = d.temp[ , !names(d.temp) == "eventAction" & !names(d.temp) =="eventCategory" ]
+        
+      } else {
+        # keep only information when event category is HelperDetail_Displayed
+        d.temp = d.temp[ d.temp$eventCategory == "HelperDetail_Displayed", ]
+        
+        # sync the variable names across platforms
+        names(d.temp)[ names(d.temp) == "eventAction" ] = "helpers"
+        
+        # for happy merging
+        d.temp = d.temp[ , !names(d.temp) == "eventLabel" & !names(d.temp) =="eventCategory" ]
+      }
+      # merge herpers' record displayed on different dates
+          
+        # d.temp = d.temp[ , !names(d.temp) == "date"]
+        # %>% group_by(helpers)
+        #   # filter( country == "United States") 
+        #   summarise( total = sum( !!sym(metric) ))
+        }
   }
   
   ##### Path Data #####
@@ -220,7 +270,7 @@ fetch_one_platform = function( metric,
       
       # for happy merging
       d.temp = d.temp[ , !names(d.temp) == "eventLabel" ]
-
+      
     }
     
   }
@@ -236,13 +286,9 @@ fetch_one_platform = function( metric,
   return(d.temp)
 }
 
-
-
-
-
 # d = get_data(metric = "sessions",
-#                            start.date = "2017-01-01",
-#                            end.date = "2017-12-01"  )
+#                            start.date = "2019-01-01",
+#                            end.date = "2019-01-25"  )
 
 
 
@@ -261,13 +307,24 @@ fetch_one_platform = function( metric,
 #                                   "region",
 #                                   "country"),
 #                   max = -1 )
-
+##########################summarize Detail Displayed for individual Helper################
+HelperDetailSummarise <- function(.metric,
+                                  .data) {
+  # reshape to have 1 row per state
+  d2 = .data[] %>%
+    filter( country == "United States") %>%
+    group_by(helpers, region) %>%
+    summarise( total = sum( !!sym(.metric) ) )
+  names(f)[names(f) == 'Name_Pub'] <- 'helpers'
+  d3 <- left_join(d2,f, by=c("helpers"))
+  return(d3)
+}
+# d2<-HelperDetailSummarise(.metric = "sessions", .data = d)
 ############################### FN: MAKE CHLOROPLETH ###############################
 
 # .type can be a vector to consider events in multiple categories
 # .title: title for plot
 # .legend.breaks: how many breaks for the color palette in the legend?
-
 chloropleth = function( .type,
                         .metric,
                         .platforms = c("iPhone", "web", "android", "mweb"),
@@ -282,26 +339,26 @@ chloropleth = function( .type,
     filter( country == "United States") %>%
     group_by(region) %>%
     summarise( total = sum( !!sym(.metric) ) )
-
+  
   d2$region = tolower(d2$region)
-
-
+  
+  
   # https://cran.r-project.org/web/packages/fiftystater/vignettes/fiftystater.html
   # make placeholder rows for nonexistent states
   state.names = unique( fifty_states$id )
-
+  
   d3 = data.frame( region = state.names, total = 0 )
-
+  
   d4 = merge( d3, d2, all.x = TRUE, by.x = "region", by.y = "region" )
-
+  
   names(d4)[ names(d4) == "total.y" ] = "total"
   d4$total[ is.na(d4$total) ] = NA
-
-
+  
+  
   # 9 because this is the max (finest-grained) color palette
   library("RColorBrewer")
   myPalette = colorRampPalette(brewer.pal(9, "YlOrBr"))
-
+  
   if ( is.na(.title) ) {
     title = paste( "Total ", .metric, " of ",
                    paste( .type, collapse=" + "), # collapse to handle when .type has length > 1
@@ -324,7 +381,7 @@ chloropleth = function( .type,
   } else if ( max > 100 ) {
     breaks = round( breaks / 10 ) * 10
   } else {
-      breaks = round( breaks )
+    breaks = round( breaks )
   }
   
   
@@ -350,13 +407,13 @@ chloropleth = function( .type,
           axis.ticks=element_blank(),
           axis.title.x=element_blank(),
           axis.title.y=element_blank()
-          ) +
+    ) +
     guides(fill=guide_legend(title=" ")) +
     ggtitle(title)
-
+  
   # add border boxes to AK/HI
   p + fifty_states_inset_boxes()
-
+  
 }
 
 
@@ -376,16 +433,16 @@ chloropleth = function( .type,
 ############################### FN: MAKE LINE PLOT OF EVENTS OVER TIME ###############################
 
 line_plot = function( .data,
-           .type,
-           .metric,
-            .platforms = c("iPhone", "web", "android", "mweb"),
-           .start.date,
-           .end.date ) {
-
+                      .type,
+                      .metric,
+                      .platforms = c("iPhone", "web", "android", "mweb"),
+                      .start.date,
+                      .end.date ) {
+  
   d.month = .data[ .data$type == .type & .data$platform %in% .platforms, ] %>% filter( country == "United States" ) %>%
-      group_by(month) %>%
-      summarise( total = sum( !!sym(.metric) ) )
-
+    group_by(month) %>%
+    summarise( total = sum( !!sym(.metric) ) )
+  
   ggplot( data = d.month, aes(x = month, y = total) ) +
     geom_line() +
     scale_x_continuous( breaks = seq(1, 12, 1) ) +
@@ -413,5 +470,6 @@ line_plot = function( .data,
 # 
 # summary_stats( .type = "MapDirections", .metric = "sessions", .data = d )
 # summary_stats( .type = "MapDirections", .metric = "sessions", .data = d )
+
 
 
